@@ -7,12 +7,12 @@ use App\Models\DentalProfessional;
 
 class ProfessionalSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $professionals = [
             [
-                'first_name' => 'Juan',
-                'last_name' => 'Pérez',
+                'first_name' => 'Fernando',
+                'last_name' => 'DSantiago',
                 'rut' => '12345678-9',
                 'email' => 'juan.perez@dentalclinic.cl',
                 'phone' => '+56912121212',

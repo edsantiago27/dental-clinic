@@ -7,7 +7,7 @@ use App\Models\Treatment;
 
 class TreatmentSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $treatments = [
             [
@@ -46,6 +46,21 @@ class TreatmentSeeder extends Seeder
                 'price' => 150000,
                 'category' => 'Endodoncia',
                 'requires_anesthesia' => true,
+            ],
+            [
+                'name' => 'Implante dental',
+                'description' => 'Colocación de implante dental',
+                'duration_minutes' => 120,
+                'price' => 450000,
+                'category' => 'Cirugía',
+                'requires_anesthesia' => true,
+            ],
+            [
+                'name' => 'Consulta general',
+                'description' => 'Evaluación y diagnóstico general',
+                'duration_minutes' => 30,
+                'price' => 15000,
+                'category' => 'Preventivo',
             ],
         ];
 

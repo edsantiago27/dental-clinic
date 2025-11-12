@@ -11,16 +11,23 @@ class AppointmentService
     public function createAppointment(array $data)
     {
         $treatment = Treatment::findOrFail($data['treatment_id']);
-
         $startTime = Carbon::createFromFormat('H:i', $data['start_time']);
         $endTime = $startTime->copy()->addMinutes($treatment->duration_minutes);
 
-        $this->checkAvailability(
-            $data['dental_professional_id'],
-            $data['appointment_date'],
-            $data['start_time'],
-            $endTime->format('H:i')
-        );
+        
+       $this->checkAvailability(
+        $data['dental_professional_id'],
+        $data['appointment_date'],
+        $data['start_time'],
+        $endTime->format('H:i')
+    );
+// NUEVO: Validar disponibilidad del paciente
+    $this->checkPatientAvailability(
+        $data['patient_id'],
+        $data['appointment_date'],
+        $data['start_time'],
+        $endTime->format('H:i')
+    );
 
         $appointment = Appointment::create([
             'patient_id' => $data['patient_id'],
@@ -123,7 +130,27 @@ class AppointmentService
             ->exists();
 
         if ($conflict) {
-            throw new \Exception('El horario seleccionado no está disponible');
+            throw new \Exception('El horario seleccionado no está disponible para este profesional');
         }
     }
+
+    protected function checkPatientAvailability($patientId, $date, $startTime, $endTime)
+{
+    $conflict = Appointment::where('patient_id', $patientId)
+        ->whereDate('appointment_date', $date)
+        ->whereIn('status', [Appointment::STATUS_PENDING, Appointment::STATUS_CONFIRMED])
+        ->where(function($query) use ($startTime, $endTime) {
+            $query->whereBetween('start_time', [$startTime, $endTime])
+                  ->orWhereBetween('end_time', [$startTime, $endTime])
+                  ->orWhere(function($q) use ($startTime, $endTime) {
+                      $q->where('start_time', '<=', $startTime)
+                        ->where('end_time', '>=', $endTime);
+                  });
+        })
+        ->exists();
+
+    if ($conflict) {
+        throw new \Exception('Ya tienes una cita agendada a esa hora');
+    }
+}
 }

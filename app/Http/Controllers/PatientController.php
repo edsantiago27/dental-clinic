@@ -39,6 +39,10 @@ class PatientController extends Controller
             'email' => 'required|email|unique:patients',
             'phone' => 'required|string|max:20',
             'date_of_birth' => 'required|date',
+            'gender' => 'nullable|string|max:10',
+            'address' => 'nullable|string|max:200',
+            'emergency_contact' => 'nullable|string|max:100',
+            'emergency_phone' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -78,6 +82,11 @@ class PatientController extends Controller
             'rut' => 'sometimes|string|max:12|unique:patients,rut,' . $id,
             'email' => 'sometimes|email|unique:patients,email,' . $id,
             'phone' => 'sometimes|string|max:20',
+            'date_of_birth' => 'sometimes|date',
+            'gender' => 'nullable|string|max:10',
+            'address' => 'nullable|string|max:200',
+            'emergency_contact' => 'nullable|string|max:100',
+            'emergency_phone' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -93,6 +102,16 @@ class PatientController extends Controller
             'success' => true,
             'message' => 'Paciente actualizado exitosamente',
             'data' => $patient
+        ]);
+    }
+     public function destroy($id)
+    {
+        $patient = Patient::findOrFail($id);
+        $patient->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Paciente eliminado exitosamente'
         ]);
     }
 }

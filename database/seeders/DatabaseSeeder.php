@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     {
         // Crear usuario administrador
         User::create([
-           // 'name' => 'Admin Dental Clinic',
+            //'name' => 'Admin Dental Clinic',
             'username' => 'admin',
             'email' => 'admin@dentalclinic.cl',
             'password' => Hash::make('admin123'),

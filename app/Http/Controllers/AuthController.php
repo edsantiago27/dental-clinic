@@ -102,7 +102,9 @@ class AuthController extends Controller
                     'username' => $user->username,
                     'email' => $user->email,
                     'role' => $user->role,
-                    'full_name' => $patient->full_name,
+                    'patient_id' => $patient->id,  // ← Agregar esto
+            'full_name' => $patient->full_name,
+            'patient' => $patient  // ← Agregar el objeto completo
                 ]
             ]
         ], 201);
@@ -121,7 +123,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
-        $user->load('patient');
+        $user->load('patient', 'dentalProfessional');
 
         return response()->json([
             'success' => true,
@@ -130,8 +132,11 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'email' => $user->email,
                 'role' => $user->role,
+                'patient_id' => $user->patient_id,  // ← Agregar esto
+            'dental_professional_id' => $user->dental_professional_id,  // ← Agregar esto            
                 'full_name' => $user->patient ? $user->patient->full_name : $user->username,
                 'patient' => $user->patient,
+                'dentalProfessional' => $user->dentalProfessional,
             ]
         ]);
     }

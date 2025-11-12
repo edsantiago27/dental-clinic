@@ -18,10 +18,15 @@ class MedicalHistory extends Model
         'medications',
         'notes',
         'observations',
+        'anesthesia_type',      // NUEVO
+        'anesthesia_dose',      // NUEVO
+        'xray_taken',           // NUEVO
+        'xray_notes',           // NUEVO
     ];
 
     protected $casts = [
-        'visit_date' => 'date',
+         'visit_date' => 'date',
+        'xray_taken' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
