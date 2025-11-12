@@ -36,79 +36,104 @@ class AuthController extends Controller
         $user->update(['last_login' => now()]);
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'full_name' => $user->patient ? $user->patient->full_name : $user->username,
-                ]
-            ]
-        ]);
+        
+    // Buscar el paciente si el rol es patient
+    $patient = null;
+    if ($user->role === 'patient') {
+        $patient = Patient::where('user_id', $user->id)->first();
     }
 
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:100',
-            'last_name' => 'required|string|max:100',
-            'rut' => 'required|string|max:12|unique:patients',
-            'email' => 'required|email|unique:patients|unique:users',
-            'phone' => 'required|string|max:20',
-            'password' => 'required|string|min:6',
-            'date_of_birth' => 'required|date',
-        ]);
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role' => $user->role,
+                'full_name' => $patient ? $patient->first_name . ' ' . $patient->last_name : $user->username,
+                'patient_id' => $patient ? $patient->id : null
+            ]
+        ]
+    ], 200);
+}
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
+   public function register(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'first_name' => 'required|string|max:100',
+        'last_name' => 'required|string|max:100',
+        'rut' => 'required|string|max:20',
+        'phone' => 'required|string|max:20',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-        $patient = Patient::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'rut' => $request->rut,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-            'emergency_contact' => $request->emergency_contact,
-            'emergency_phone' => $request->emergency_phone,
-        ]);
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors()
+        ], 422);
+    }
 
+    try {
+        // Buscar si ya existe un paciente con ese RUT o email
+        $existingPatient = Patient::where('rut', $request->rut)
+            ->orWhere('email', $request->email)
+            ->whereNull('user_id') // Solo pacientes sin usuario vinculado
+            ->first();
+
+        // Crear usuario
         $user = User::create([
-            'username' => strtolower($request->first_name . $request->last_name),
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'username' => explode('@', $request->email)[0],
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => User::ROLE_PATIENT,
-            'patient_id' => $patient->id,
+            'role' => 'patient',
+            'status' => 'active'
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        if ($existingPatient) {
+            // Vincular paciente existente con el nuevo usuario
+            $existingPatient->update([
+                'user_id' => $user->id,
+                'email' => $request->email, // Actualizar email si es diferente
+                'phone' => $request->phone, // Actualizar teléfono si es diferente
+            ]);
+            
+            $patient = $existingPatient;
+            $message = 'Usuario registrado exitosamente y vinculado con su historial de paciente';
+        } else {
+            // Crear nuevo paciente
+            $patient = Patient::create([
+                'user_id' => $user->id,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'rut' => $request->rut,
+                'phone' => $request->phone,
+                'email' => $request->email,
+            ]);
+            
+            $message = 'Usuario registrado exitosamente';
+        }
 
         return response()->json([
             'success' => true,
+            'message' => $message,
             'data' => [
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'patient_id' => $patient->id,  // ← Agregar esto
-            'full_name' => $patient->full_name,
-            'patient' => $patient  // ← Agregar el objeto completo
-                ]
+                'user' => $user,
+                'patient' => $patient,
+                'existing_patient_linked' => $existingPatient ? true : false
             ]
         ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al registrar usuario: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function logout(Request $request)
     {

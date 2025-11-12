@@ -162,4 +162,58 @@ class AppointmentController extends Controller
             'data' => $slots
         ]);
     }
+    public function update(Request $request, $id)
+{
+    $validator = Validator::make($request->all(), [
+        'patient_id' => 'sometimes|exists:patients,id',
+        'dental_professional_id' => 'sometimes|exists:dental_professionals,id',
+        'treatment_id' => 'sometimes|exists:treatments,id',
+        'appointment_date' => 'sometimes|date',
+        'start_time' => 'sometimes|date_format:H:i',
+        'status' => 'sometimes|in:Pending,Confirmed,Completed,Cancelled',
+        'notes' => 'nullable|string'
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    try {
+        $appointment = Appointment::findOrFail($id);
+        $appointment->update($request->all());
+        $appointment->load(['patient', 'dentalProfessional', 'treatment']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cita actualizada exitosamente',
+            'data' => $appointment
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 400);
+    }
+}
+
+public function destroy($id)
+{
+    try {
+        $appointment = Appointment::findOrFail($id);
+        $appointment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cita eliminada exitosamente'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 400);
+    }
+}
 }

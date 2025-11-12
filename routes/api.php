@@ -7,14 +7,14 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfessionalController;
 use App\Http\Controllers\TreatmentController;
 use App\Http\Controllers\MedicalHistoryController;
-use App\Http\Controllers\DentalProfessionalController;
+
+
 // Rutas públicas
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 
 // Rutas públicas de consulta
 Route::get('/treatments', [TreatmentController::class, 'index']);
-//Route::get('/dental-professionals', [DentalProfessionalController::class, 'index']);
 Route::get('/professionals', [ProfessionalController::class, 'index']);
 Route::get('/appointments/available-slots', [AppointmentController::class, 'availableSlots']);
 
@@ -34,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
     Route::put('/appointments/{id}/confirm', [AppointmentController::class, 'confirm']);
     Route::put('/appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
+    Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
+Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
 
     // Pacientes
     Route::get('/patients', [PatientController::class, 'index']);

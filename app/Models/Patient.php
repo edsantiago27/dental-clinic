@@ -2,61 +2,36 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Patient extends Model
 {
-    use SoftDeletes;
+    use HasFactory;
 
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'rut',
-        'email',
-        'phone',
-        'address',
-        'date_of_birth',
-        'gender',
-        'emergency_contact',
-        'emergency_phone',
-    ];
+ protected $fillable = [
+    'user_id',
+    'first_name',
+    'last_name',
+    'rut',
+    'phone',
+    'email',
+    'birthdate',
+    'address',
+    'allergies'
+];
 
     protected $casts = [
-        'date_of_birth' => 'date',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'birthdate' => 'date'
     ];
 
-    protected $appends = ['full_name', 'age'];
-
-    public function getFullNameAttribute()
+    public function user()
     {
-        return "{$this->first_name} {$this->last_name}";
-    }
-
-    public function getAgeAttribute()
-    {
-        return $this->date_of_birth ? $this->date_of_birth->age : null;
+        return $this->belongsTo(User::class);
     }
 
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
-    }
-
-    public function medicalHistories()
-    {
-        return $this->hasMany(MedicalHistory::class);
-    }
-
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
-    public function user()
-    {
-        return $this->hasOne(User::class);
     }
 }

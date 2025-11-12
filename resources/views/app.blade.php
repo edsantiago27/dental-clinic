@@ -26,6 +26,19 @@
                 <p class="text-gray-600 mt-2">Sistema de Gestión</p>
             </div>
             
+            <!-- Tabs -->
+            <div class="flex mb-6 border-b">
+                <button id="loginTab" onclick="showAuthTab('login')" 
+                    class="flex-1 py-3 text-center font-semibold border-b-2 border-blue-500 text-blue-600">
+                    Iniciar Sesión
+                </button>
+                <button id="registerTab" onclick="showAuthTab('register')" 
+                    class="flex-1 py-3 text-center font-semibold border-b-2 border-transparent text-gray-500 hover:text-blue-600">
+                    Registrarse
+                </button>
+            </div>
+
+            <!-- Login Form -->
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -50,9 +63,82 @@
                     <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
                 </button>
             </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="space-y-4" style="display: none;">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user mr-2"></i>Nombre
+                        </label>
+                        <input type="text" id="registerFirstName" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Apellido
+                        </label>
+                        <input type="text" id="registerLastName" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-id-card mr-2"></i>RUT
+                    </label>
+                    <input type="text" id="registerRut" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="12345678-9">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-phone mr-2"></i>Teléfono
+                    </label>
+                    <input type="tel" id="registerPhone" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="+56912345678">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email
+                    </label>
+                    <input type="email" id="registerEmail" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="tu@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Contraseña
+                    </label>
+                    <input type="password" id="registerPassword" required minlength="6"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Confirmar Contraseña
+                    </label>
+                    <input type="password" id="registerPasswordConfirm" required minlength="6"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Repite tu contraseña">
+                </div>
+                
+                <button type="submit" 
+                    class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-blue-600 transition">
+                    <i class="fas fa-user-plus mr-2"></i>Crear Cuenta
+                </button>
+            </form>
             
             <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">Demo: admin@dental.com / admin123</p>
+                <p class="text-sm text-gray-600 font-semibold mb-2">Credenciales de Prueba:</p>
+                <p class="text-xs text-gray-600"><strong>Admin:</strong> admin@dental.com / admin123</p>
+                <p class="text-xs text-gray-600"><strong>Paciente:</strong> paciente@test.com / 123456</p>
             </div>
         </div>
     </div>
@@ -179,10 +265,10 @@
                         <input type="date" id="filterDate" class="px-4 py-2 border rounded-lg">
                         <select id="filterStatus" class="px-4 py-2 border rounded-lg">
                             <option value="">Todos los estados</option>
-                            <option value="scheduled">Programada</option>
-                            <option value="confirmed">Confirmada</option>
-                            <option value="completed">Completada</option>
-                            <option value="cancelled">Cancelada</option>
+                            <option value="Pending">Pendiente</option>
+                            <option value="Confirmed">Confirmada</option>
+                            <option value="Completed">Completada</option>
+                            <option value="Cancelled">Cancelada</option>
                         </select>
                         <select id="filterProfessional" class="px-4 py-2 border rounded-lg">
                             <option value="">Todos los profesionales</option>
@@ -271,6 +357,85 @@
                 </div>
             </div>
 
+            <!-- ============================================ -->
+            <!-- SECCIÓN MIS CITAS (PACIENTES) -->
+            <!-- ============================================ -->
+            <div id="myAppointmentsSection" class="section" style="display: none;">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Mis Citas</h2>
+
+                <!-- Mis Citas Cards -->
+                <div id="myAppointmentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECCIÓN AGENDAR CITA (PACIENTES) -->
+            <!-- ============================================ -->
+            <div id="bookAppointmentSection" class="section" style="display: none;">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Agendar Nueva Cita</h2>
+
+                <div class="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
+                    <!-- Botón de prueba para recargar -->
+                    <button onclick="loadBookAppointmentForm()" class="mb-4 bg-gray-500 text-white px-4 py-2 rounded text-sm">
+                        🔄 Recargar Formulario
+                    </button>
+                    
+                    <form id="patientAppointmentForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2"></i>Profesional
+                            </label>
+                            <select id="patientAppointmentProfessional" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Cargando profesionales...</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Si no aparecen opciones, presiona "Recargar Formulario"</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-tooth mr-2"></i>Tratamiento
+                            </label>
+                            <select id="patientAppointmentTreatment" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Cargando tratamientos...</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-2"></i>Fecha
+                                </label>
+                                <input type="date" id="patientAppointmentDate" required 
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-clock mr-2"></i>Hora
+                                </label>
+                                <input type="time" id="patientAppointmentTime" required 
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-comment mr-2"></i>Notas (opcional)
+                            </label>
+                            <textarea id="patientAppointmentNotes" rows="3" 
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Indique el motivo de su consulta o alguna información relevante..."></textarea>
+                        </div>
+
+                        <button type="submit" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-green-600 transition text-lg">
+                            <i class="fas fa-check-circle mr-2"></i>Confirmar Cita
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -320,10 +485,10 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
                         <select id="appointmentStatus" class="w-full px-4 py-2 border rounded-lg">
-                            <option value="scheduled">Programada</option>
-                            <option value="confirmed">Confirmada</option>
-                            <option value="completed">Completada</option>
-                            <option value="cancelled">Cancelada</option>
+                            <option value="Pending">Pendiente</option>
+                            <option value="Confirmed">Confirmada</option>
+                            <option value="Completed">Completada</option>
+                            <option value="Cancelled">Cancelada</option>
                         </select>
                     </div>
                 </div>
@@ -558,16 +723,55 @@
         // CONFIGURACIÓN
         // ========================================
         const API_URL = 'http://127.0.0.1:8001/api';
-        let authToken = null;
-        let currentUser = null;
+        let authToken = localStorage.getItem('authToken') || null;
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let allAppointments = [];
         let allPatients = [];
         let allProfessionals = [];
         let allTreatments = [];
 
+        // Verificar si hay sesión activa al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            if (authToken && currentUser) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardScreen').style.display = 'block';
+                document.getElementById('userName').textContent = currentUser.full_name || currentUser.username;
+                loadDashboardData();
+                setupNavigation();
+            }
+        });
+
         // ========================================
         // FUNCIONES DE AUTENTICACIÓN
         // ========================================
+        
+        // Cambiar entre tabs de Login y Registro
+        function showAuthTab(tab) {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (tab === 'login') {
+                loginTab.classList.add('border-blue-500', 'text-blue-600');
+                loginTab.classList.remove('border-transparent', 'text-gray-500');
+                registerTab.classList.remove('border-blue-500', 'text-blue-600');
+                registerTab.classList.add('border-transparent', 'text-gray-500');
+                
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                registerTab.classList.add('border-blue-500', 'text-blue-600');
+                registerTab.classList.remove('border-transparent', 'text-gray-500');
+                loginTab.classList.remove('border-blue-500', 'text-blue-600');
+                loginTab.classList.add('border-transparent', 'text-gray-500');
+                
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+
+        // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -587,11 +791,16 @@
                     authToken = data.data.token;
                     currentUser = data.data.user;
                     
+                    // Guardar en localStorage para persistencia
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('dashboardScreen').style.display = 'block';
                     document.getElementById('userName').textContent = currentUser.full_name || currentUser.username;
                     
                     await loadDashboardData();
+                    setupNavigation();
                 } else {
                     alert('Error: ' + (data.message || 'Credenciales inválidas'));
                 }
@@ -601,18 +810,129 @@
             }
         });
 
+        // Registro
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            // Validar que las contraseñas coincidan
+            if (password !== passwordConfirm) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            const data = {
+                first_name: document.getElementById('registerFirstName').value,
+                last_name: document.getElementById('registerLastName').value,
+                rut: document.getElementById('registerRut').value,
+                phone: document.getElementById('registerPhone').value,
+                email: document.getElementById('registerEmail').value,
+                password: password,
+                password_confirmation: passwordConfirm
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    let message = result.message || '¡Registro exitoso! Ahora puedes iniciar sesión.';
+                    
+                    if (result.data?.existing_patient_linked) {
+                        message += '\n\n✅ Se encontró tu historial previo como paciente y ha sido vinculado a tu cuenta. Podrás ver todas tus citas anteriores.';
+                    }
+                    
+                    alert(message);
+                    document.getElementById('registerForm').reset();
+                    showAuthTab('login');
+                    
+                    // Prellenar el email en el formulario de login
+                    document.getElementById('loginEmail').value = data.email;
+                } else {
+                    const errorMsg = result.message || 'Error al registrar usuario';
+                    const errors = result.errors;
+                    
+                    if (errors) {
+                        let errorText = errorMsg + '\n\n';
+                        for (let field in errors) {
+                            errorText += errors[field].join('\n') + '\n';
+                        }
+                        alert(errorText);
+                    } else {
+                        alert(errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                alert('Error al conectar con el servidor');
+            }
+        });
+
         function logout() {
             authToken = null;
             currentUser = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+        }
+
+        // ========================================
+        // CONFIGURAR NAVEGACIÓN SEGÚN ROL
+        // ========================================
+        function setupNavigation() {
+            const navTabs = document.querySelector('.max-w-7xl.mx-auto.px-4 .flex.space-x-8');
+            
+            if (currentUser.role === 'patient') {
+                // Vista para pacientes
+                navTabs.innerHTML = `
+                    <button onclick="showSection('dashboard')" class="nav-tab py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium">
+                        <i class="fas fa-home mr-2"></i>Inicio
+                    </button>
+                    <button onclick="showSection('myAppointments')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-calendar-alt mr-2"></i>Mis Citas
+                    </button>
+                    <button onclick="showSection('bookAppointment')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-plus-circle mr-2"></i>Agendar Cita
+                    </button>
+                `;
+            } else {
+                // Vista para admin (ya existe)
+                navTabs.innerHTML = `
+                    <button onclick="showSection('dashboard')" class="nav-tab py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </button>
+                    <button onclick="showSection('appointments')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-calendar-alt mr-2"></i>Citas
+                    </button>
+                    <button onclick="showSection('patients')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-users mr-2"></i>Pacientes
+                    </button>
+                    <button onclick="showSection('professionals')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-user-md mr-2"></i>Profesionales
+                    </button>
+                    <button onclick="showSection('treatments')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-tooth mr-2"></i>Tratamientos
+                    </button>
+                `;
+            }
         }
 
         // ========================================
         // NAVEGACIÓN
         // ========================================
         function showSection(section) {
+            console.log('🎯 Navegando a sección:', section);
+            
             // Ocultar todas las secciones
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
             
@@ -623,18 +943,205 @@
             });
             
             // Mostrar sección seleccionada
-            document.getElementById(section + 'Section').style.display = 'block';
+            const sectionElement = document.getElementById(section + 'Section');
+            if (sectionElement) {
+                sectionElement.style.display = 'block';
+                console.log('✅ Sección mostrada:', section + 'Section');
+            } else {
+                console.error('❌ No se encontró la sección:', section + 'Section');
+            }
             
             // Activar tab correspondiente
-            event.target.classList.remove('border-transparent', 'text-gray-600');
-            event.target.classList.add('border-blue-500', 'text-blue-600');
+            if (event && event.target) {
+                event.target.classList.remove('border-transparent', 'text-gray-600');
+                event.target.classList.add('border-blue-500', 'text-blue-600');
+            }
             
             // Cargar datos según sección
-            if (section === 'dashboard') loadDashboardData();
-            if (section === 'appointments') loadAppointments();
-            if (section === 'patients') loadPatients();
-            if (section === 'professionals') loadProfessionals();
-            if (section === 'treatments') loadTreatments();
+            console.log('📊 Cargando datos para:', section);
+            
+            // Usar async/await apropiadamente
+            if (section === 'dashboard') {
+                loadDashboardData();
+            } else if (section === 'appointments') {
+                loadAppointments();
+            } else if (section === 'patients') {
+                loadPatients();
+            } else if (section === 'professionals') {
+                loadProfessionals();
+            } else if (section === 'treatments') {
+                loadTreatments();
+            } else if (section === 'myAppointments') {
+                loadMyAppointments();
+            } else if (section === 'bookAppointment') {
+                console.log('🚀 Llamando a loadBookAppointmentForm directamente...');
+                // Llamar directamente sin setTimeout
+                loadBookAppointmentForm().then(() => {
+                    console.log('✅ loadBookAppointmentForm completado');
+                }).catch(err => {
+                    console.error('❌ Error en loadBookAppointmentForm:', err);
+                });
+            }
+        }
+
+        // ========================================
+        // FUNCIONES PARA PACIENTES
+        // ========================================
+        async function loadMyAppointments() {
+            try {
+                const response = await apiRequest(`/appointments?patient_id=${currentUser.patient_id || currentUser.id}`);
+                
+                // Normalizar datos
+                const appointmentsData = response?.data?.data || response?.data || (Array.isArray(response) ? response : []);
+                
+                const grid = document.getElementById('myAppointmentsGrid');
+                
+                if (!appointmentsData || appointmentsData.length === 0) {
+                    grid.innerHTML = '<p class="text-gray-500 text-center col-span-3 py-8">No tienes citas agendadas</p>';
+                    return;
+                }
+                
+                grid.innerHTML = appointmentsData.map(apt => `
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">${apt.treatment?.name || 'Sin tratamiento'}</h3>
+                                <p class="text-sm text-purple-600 font-medium">${apt.dentalProfessional?.first_name || ''} ${apt.dentalProfessional?.last_name || ''}</p>
+                            </div>
+                            <span class="px-3 py-1 text-xs rounded-full ${getStatusClass(apt.status)}">
+                                ${getStatusText(apt.status)}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-calendar mr-2 text-blue-500"></i>
+                                <strong>${apt.appointment_date}</strong>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-clock mr-2 text-green-500"></i>
+                                <strong>${apt.start_time || ''}</strong>
+                            </p>
+                            ${apt.notes ? `
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-comment mr-2 text-gray-400"></i>
+                                    ${apt.notes}
+                                </p>
+                            ` : ''}
+                        </div>
+                        
+                        ${apt.status === 'Pending' || apt.status === 'Confirmed' ? `
+                            <button onclick="cancelMyAppointment(${apt.id})" 
+                                class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 text-sm">
+                                <i class="fas fa-times-circle mr-1"></i>Cancelar Cita
+                            </button>
+                        ` : ''}
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error cargando mis citas:', error);
+            }
+        }
+
+        async function loadBookAppointmentForm() {
+            try {
+                const [professionals, treatments] = await Promise.all([
+                    apiRequest('/professionals'),
+                    apiRequest('/treatments')
+                ]);
+                
+                const professionalsData = professionals?.data?.data || professionals?.data || (Array.isArray(professionals) ? professionals : []);
+                const treatmentsData = treatments?.data?.data || treatments?.data || (Array.isArray(treatments) ? treatments : []);
+                
+                document.getElementById('patientAppointmentProfessional').innerHTML = 
+                    '<option value="">Seleccionar profesional...</option>' +
+                    (Array.isArray(professionalsData) ? professionalsData.map(p => 
+                        `<option value="${p.id}">${p.first_name} ${p.last_name} - ${p.specialty}</option>`
+                    ).join('') : '');
+                
+                document.getElementById('patientAppointmentTreatment').innerHTML = 
+                    '<option value="">Seleccionar tratamiento...</option>' +
+                    (Array.isArray(treatmentsData) ? treatmentsData.map(t => 
+                        `<option value="${t.id}">${t.name} - ${Number(t.price).toLocaleString('es-CL')} (${t.duration} min)</option>`
+                    ).join('') : '');
+                
+                // Establecer fecha mínima como hoy
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('patientAppointmentDate').setAttribute('min', today);
+                
+            } catch (error) {
+                console.error('Error cargando formulario:', error);
+            }
+        }
+
+        document.getElementById('patientAppointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Obtener el patient_id del usuario actual
+            let patientId = currentUser.patient_id;
+            
+            // Si no tiene patient_id en el user, buscar en la tabla patients
+            if (!patientId) {
+                try {
+                    const patientsResponse = await apiRequest('/patients');
+                    const patientsData = patientsResponse?.data?.data || patientsResponse?.data || [];
+                    const patient = patientsData.find(p => p.user_id === currentUser.id);
+                    patientId = patient?.id;
+                } catch (error) {
+                    console.error('Error buscando paciente:', error);
+                }
+            }
+            
+            if (!patientId) {
+                alert('Error: No se pudo encontrar el registro de paciente. Por favor contacte al administrador.');
+                return;
+            }
+            
+            const data = {
+                patient_id: patientId,
+                dental_professional_id: document.getElementById('patientAppointmentProfessional').value,
+                treatment_id: document.getElementById('patientAppointmentTreatment').value,
+                appointment_date: document.getElementById('patientAppointmentDate').value,
+                start_time: document.getElementById('patientAppointmentTime').value,
+                status: 'Pending',
+                notes: document.getElementById('patientAppointmentNotes').value
+            };
+            
+            try {
+                const response = await apiRequest('/appointments', 'POST', data);
+                
+                if (response.success) {
+                    alert('¡Cita agendada exitosamente! Recibirás una confirmación pronto.');
+                    document.getElementById('patientAppointmentForm').reset();
+                    showSection('myAppointments');
+                } else {
+                    alert('Error: ' + (response.message || 'No se pudo agendar la cita'));
+                }
+            } catch (error) {
+                console.error('Error agendando cita:', error);
+                alert('Error al agendar la cita: ' + error.message);
+            }
+        });
+
+        async function cancelMyAppointment(id) {
+            if (!confirm('¿Está seguro de cancelar esta cita?')) return;
+            
+            try {
+                const response = await apiRequest(`/appointments/${id}/cancel`, 'PUT', { 
+                    reason: 'Cancelada por el paciente' 
+                });
+                
+                if (response.success) {
+                    alert('Cita cancelada correctamente');
+                    loadMyAppointments();
+                } else {
+                    alert('Error al cancelar la cita');
+                }
+            } catch (error) {
+                console.error('Error cancelando cita:', error);
+                alert('Error al cancelar la cita');
+            }
         }
 
         // ========================================
@@ -676,45 +1183,125 @@
         // ========================================
         async function loadDashboardData() {
             try {
-                // Cargar estadísticas
-                const [appointments, patients, professionals, treatments] = await Promise.all([
-                    apiRequest('/appointments'),
-                    apiRequest('/patients'),
-                    apiRequest('/professionals'),
-                    apiRequest('/treatments')
-                ]);
-                
-                document.getElementById('totalAppointments').textContent = appointments.data?.length || 0;
-                document.getElementById('totalPatients').textContent = patients.data?.length || 0;
-                document.getElementById('totalProfessionals').textContent = professionals.data?.length || 0;
-                document.getElementById('totalTreatments').textContent = treatments.data?.length || 0;
-                
-                // Mostrar próximas citas
-                const upcomingAppointments = appointments.data?.filter(apt => {
-                    const aptDate = new Date(apt.appointment_date);
-                    return aptDate >= new Date() && apt.status !== 'cancelled';
-                }).slice(0, 5) || [];
-                
-                const recentHtml = upcomingAppointments.length > 0 
-                    ? upcomingAppointments.map(apt => `
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <p class="font-semibold">${apt.patient?.first_name} ${apt.patient?.last_name}</p>
-                                <p class="text-sm text-gray-600">${apt.treatment?.name}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-semibold">${apt.appointment_date}</p>
-                                <p class="text-sm text-gray-600">${apt.start_time}</p>
-                            </div>
-                        </div>
-                    `).join('')
-                    : '<p class="text-gray-500 text-center py-4">No hay citas próximas</p>';
-                
-                document.getElementById('recentAppointments').innerHTML = recentHtml;
-                
+                if (currentUser.role === 'patient') {
+                    // Dashboard para pacientes
+                    await loadPatientDashboard();
+                } else {
+                    // Dashboard para admin
+                    await loadAdminDashboard();
+                }
             } catch (error) {
                 console.error('Error cargando dashboard:', error);
             }
+        }
+
+        async function loadPatientDashboard() {
+            // Cargar solo las citas del paciente
+            const response = await apiRequest(`/appointments?patient_id=${currentUser.patient_id || currentUser.id}`);
+            const appointmentsData = response?.data?.data || response?.data || (Array.isArray(response) ? response : []);
+            
+            const dashboardSection = document.getElementById('dashboardSection');
+            
+            // Dashboard simplificado para pacientes
+            dashboardSection.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Bienvenido, ${currentUser.full_name || currentUser.username}</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-600 text-sm">Total Citas</p>
+                                <p class="text-3xl font-bold text-gray-800">${appointmentsData.length}</p>
+                            </div>
+                            <i class="fas fa-calendar-alt text-4xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-600 text-sm">Próximas</p>
+                                <p class="text-3xl font-bold text-gray-800">${appointmentsData.filter(a => new Date(a.appointment_date) >= new Date() && a.status !== 'Cancelled').length}</p>
+                            </div>
+                            <i class="fas fa-clock text-4xl text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-600 text-sm">Completadas</p>
+                                <p class="text-3xl font-bold text-gray-800">${appointmentsData.filter(a => a.status === 'Completed').length}</p>
+                            </div>
+                            <i class="fas fa-check-circle text-4xl text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Mis Próximas Citas</h3>
+                    <div id="patientUpcomingAppointments" class="space-y-3">
+                        ${appointmentsData.filter(a => new Date(a.appointment_date) >= new Date() && a.status !== 'Cancelled')
+                            .slice(0, 5)
+                            .map(apt => `
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-semibold">${apt.treatment?.name || 'Sin tratamiento'}</p>
+                                        <p class="text-sm text-gray-600">${apt.dentalProfessional?.first_name || ''} ${apt.dentalProfessional?.last_name || ''}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold">${apt.appointment_date}</p>
+                                        <p class="text-sm text-gray-600">${apt.start_time || ''}</p>
+                                    </div>
+                                </div>
+                            `).join('') || '<p class="text-gray-500 text-center py-4">No hay citas próximas</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadAdminDashboard() {
+            // Cargar estadísticas
+            const [appointments, patients, professionals, treatments] = await Promise.all([
+                apiRequest('/appointments'),
+                apiRequest('/patients'),
+                apiRequest('/professionals'),
+                apiRequest('/treatments')
+            ]);
+            
+            // Normalizar las respuestas (manejando paginación de Laravel)
+            const appointmentsData = appointments?.data?.data || appointments?.data || (Array.isArray(appointments) ? appointments : []);
+            const patientsData = patients?.data?.data || patients?.data || (Array.isArray(patients) ? patients : []);
+            const professionalsData = professionals?.data?.data || professionals?.data || (Array.isArray(professionals) ? professionals : []);
+            const treatmentsData = treatments?.data?.data || treatments?.data || (Array.isArray(treatments) ? treatments : []);
+            
+            document.getElementById('totalAppointments').textContent = Array.isArray(appointmentsData) ? appointmentsData.length : 0;
+            document.getElementById('totalPatients').textContent = Array.isArray(patientsData) ? patientsData.length : 0;
+            document.getElementById('totalProfessionals').textContent = Array.isArray(professionalsData) ? professionalsData.length : 0;
+            document.getElementById('totalTreatments').textContent = Array.isArray(treatmentsData) ? treatmentsData.length : 0;
+            
+            // Mostrar próximas citas
+            const upcomingAppointments = Array.isArray(appointmentsData) ? appointmentsData.filter(apt => {
+                const aptDate = new Date(apt.appointment_date);
+                return aptDate >= new Date() && apt.status !== 'cancelled' && apt.status !== 'Cancelled';
+            }).slice(0, 5) : [];
+            
+            const recentHtml = upcomingAppointments.length > 0 
+                ? upcomingAppointments.map(apt => `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <p class="font-semibold">${apt.patient?.first_name || ''} ${apt.patient?.last_name || ''}</p>
+                            <p class="text-sm text-gray-600">${apt.treatment?.name || 'Sin tratamiento'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold">${apt.appointment_date}</p>
+                            <p class="text-sm text-gray-600">${apt.start_time || ''}</p>
+                        </div>
+                    </div>
+                `).join('')
+                : '<p class="text-gray-500 text-center py-4">No hay citas próximas</p>';
+            
+            document.getElementById('recentAppointments').innerHTML = recentHtml;
         }
 
         // ========================================
@@ -723,13 +1310,32 @@
         async function loadAppointments() {
             try {
                 const response = await apiRequest('/appointments');
-                allAppointments = response.data || [];
+                
+                // Manejar paginación de Laravel: response.data.data
+                if (response && response.data) {
+                    if (Array.isArray(response.data.data)) {
+                        // Paginación de Laravel
+                        allAppointments = response.data.data;
+                    } else if (Array.isArray(response.data)) {
+                        // Array directo
+                        allAppointments = response.data;
+                    } else {
+                        allAppointments = [];
+                    }
+                } else if (Array.isArray(response)) {
+                    allAppointments = response;
+                } else {
+                    console.error('Formato de respuesta incorrecto:', response);
+                    allAppointments = [];
+                }
+                
                 renderAppointmentsTable(allAppointments);
                 
                 // Cargar opciones para filtros
                 await loadFilterOptions();
             } catch (error) {
                 console.error('Error cargando citas:', error);
+                alert('Error al cargar citas. Verifica la consola.');
             }
         }
 
@@ -754,10 +1360,10 @@
                         </span>
                     </td>
                     <td class="px-6 py-4">
-                        <button onclick="editAppointment(${apt.id})" class="text-blue-500 hover:text-blue-700 mr-2">
+                        <button onclick="editAppointment(${apt.id})" class="text-blue-500 hover:text-blue-700 mr-2" title="Editar cita">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="deleteAppointment(${apt.id})" class="text-red-500 hover:text-red-700">
+                        <button onclick="deleteAppointment(${apt.id})" class="text-red-500 hover:text-red-700" title="Eliminar cita">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -768,9 +1374,13 @@
         function getStatusClass(status) {
             const classes = {
                 'scheduled': 'bg-blue-100 text-blue-800',
+                'Pending': 'bg-blue-100 text-blue-800',
                 'confirmed': 'bg-green-100 text-green-800',
+                'Confirmed': 'bg-green-100 text-green-800',
                 'completed': 'bg-gray-100 text-gray-800',
-                'cancelled': 'bg-red-100 text-red-800'
+                'Completed': 'bg-gray-100 text-gray-800',
+                'cancelled': 'bg-red-100 text-red-800',
+                'Cancelled': 'bg-red-100 text-red-800'
             };
             return classes[status] || 'bg-gray-100 text-gray-800';
         }
@@ -778,9 +1388,13 @@
         function getStatusText(status) {
             const texts = {
                 'scheduled': 'Programada',
+                'Pending': 'Pendiente',
                 'confirmed': 'Confirmada',
+                'Confirmed': 'Confirmada',
                 'completed': 'Completada',
-                'cancelled': 'Cancelada'
+                'Completed': 'Completada',
+                'cancelled': 'Cancelada',
+                'Cancelled': 'Cancelada'
             };
             return texts[status] || status;
         }
@@ -834,17 +1448,22 @@
                     apiRequest('/treatments')
                 ]);
                 
+                // Normalizar datos (manejar paginación)
+                const patientsData = patients?.data?.data || patients?.data || (Array.isArray(patients) ? patients : []);
+                const professionalsData = professionals?.data?.data || professionals?.data || (Array.isArray(professionals) ? professionals : []);
+                const treatmentsData = treatments?.data?.data || treatments?.data || (Array.isArray(treatments) ? treatments : []);
+                
                 document.getElementById('appointmentPatient').innerHTML = 
                     '<option value="">Seleccionar...</option>' +
-                    (patients.data || []).map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
+                    (Array.isArray(patientsData) ? patientsData.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('') : '');
                 
                 document.getElementById('appointmentProfessional').innerHTML = 
                     '<option value="">Seleccionar...</option>' +
-                    (professionals.data || []).map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
+                    (Array.isArray(professionalsData) ? professionalsData.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('') : '');
                 
                 document.getElementById('appointmentTreatment').innerHTML = 
                     '<option value="">Seleccionar...</option>' +
-                    (treatments.data || []).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+                    (Array.isArray(treatmentsData) ? treatmentsData.map(t => `<option value="${t.id}">${t.name}</option>`).join('') : '');
                 
                 // Si es edición, cargar datos
                 if (id) {
@@ -865,6 +1484,7 @@
                 document.getElementById('appointmentModal').classList.add('active');
             } catch (error) {
                 console.error('Error cargando datos para modal:', error);
+                alert('Error al cargar datos del formulario');
             }
         }
 
@@ -888,21 +1508,26 @@
             };
             
             try {
-                const endpoint = id ? `/appointments/${id}` : '/appointments';
-                const method = id ? 'PUT' : 'POST';
-                
-                const response = await apiRequest(endpoint, method, data);
+                let response;
+                if (id) {
+                    // Editar cita existente
+                    response = await apiRequest(`/appointments/${id}`, 'PUT', data);
+                } else {
+                    // Crear nueva cita
+                    response = await apiRequest('/appointments', 'POST', data);
+                }
                 
                 if (response.success) {
                     alert(id ? 'Cita actualizada correctamente' : 'Cita creada correctamente');
                     closeAppointmentModal();
                     loadAppointments();
+                    loadDashboardData(); // Actualizar dashboard
                 } else {
                     alert('Error: ' + (response.message || 'No se pudo guardar la cita'));
                 }
             } catch (error) {
                 console.error('Error guardando cita:', error);
-                alert('Error al guardar la cita');
+                alert('Error al guardar la cita: ' + error.message);
             }
         });
 
@@ -934,10 +1559,21 @@
         async function loadPatients() {
             try {
                 const response = await apiRequest('/patients');
-                allPatients = response.data || [];
+                
+                // Validar que la respuesta tenga el formato correcto
+                if (response && response.data && Array.isArray(response.data)) {
+                    allPatients = response.data;
+                } else if (Array.isArray(response)) {
+                    allPatients = response;
+                } else {
+                    console.error('Formato de respuesta incorrecto:', response);
+                    allPatients = [];
+                }
+                
                 renderPatientsGrid(allPatients);
             } catch (error) {
                 console.error('Error cargando pacientes:', error);
+                alert('Error al cargar pacientes. Verifica la consola.');
             }
         }
 
@@ -1091,10 +1727,21 @@
         async function loadProfessionals() {
             try {
                 const response = await apiRequest('/professionals');
-                allProfessionals = response.data || [];
+                
+                // Validar que la respuesta tenga el formato correcto
+                if (response && response.data && Array.isArray(response.data)) {
+                    allProfessionals = response.data;
+                } else if (Array.isArray(response)) {
+                    allProfessionals = response;
+                } else {
+                    console.error('Formato de respuesta incorrecto:', response);
+                    allProfessionals = [];
+                }
+                
                 renderProfessionalsGrid(allProfessionals);
             } catch (error) {
                 console.error('Error cargando profesionales:', error);
+                alert('Error al cargar profesionales. Verifica la consola.');
             }
         }
 
@@ -1231,10 +1878,21 @@
         async function loadTreatments() {
             try {
                 const response = await apiRequest('/treatments');
-                allTreatments = response.data || [];
+                
+                // Validar que la respuesta tenga el formato correcto
+                if (response && response.data && Array.isArray(response.data)) {
+                    allTreatments = response.data;
+                } else if (Array.isArray(response)) {
+                    allTreatments = response;
+                } else {
+                    console.error('Formato de respuesta incorrecto:', response);
+                    allTreatments = [];
+                }
+                
                 renderTreatmentsGrid(allTreatments);
             } catch (error) {
                 console.error('Error cargando tratamientos:', error);
+                alert('Error al cargar tratamientos. Verifica la consola.');
             }
         }
 
