@@ -186,6 +186,9 @@
                     <button onclick="showSection('calendar')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
                         <i class="fas fa-calendar-alt mr-2"></i>Calendario
                     </button>
+                    <button onclick="showSection('medicalHistories')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-file-medical mr-2"></i>Historial Clínico
+                    </button>
                 </div>
             </div>
         </div>
@@ -424,6 +427,37 @@
                         <div class="w-4 h-4 bg-red-200 rounded mr-2"></div>
                         <span>Cancelada</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECCIÓN HISTORIAL CLÍNICO (ADMIN) -->
+            <!-- ============================================ -->
+            <div id="medicalHistoriesSection" class="section" style="display: none;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Historial Clínico</h2>
+                    <button onclick="openMedicalHistoryModal()" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+                        <i class="fas fa-plus mr-2"></i>Nuevo Registro
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <select id="filterHistoryPatient" class="px-4 py-2 border rounded-lg">
+                            <option value="">Todos los pacientes</option>
+                        </select>
+                        <input type="date" id="filterHistoryDateFrom" placeholder="Desde" class="px-4 py-2 border rounded-lg">
+                        <input type="date" id="filterHistoryDateTo" placeholder="Hasta" class="px-4 py-2 border rounded-lg">
+                        <button onclick="filterMedicalHistories()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-search mr-2"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Historiales -->
+                <div id="medicalHistoriesGrid" class="space-y-4">
+                    <!-- Se llena dinámicamente -->
                 </div>
             </div>
 
@@ -785,6 +819,221 @@
         </div>
     </div>
 
+    <!-- Modal Historial Clínico -->
+    <div id="medicalHistoryModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 overflow-y-auto py-8">
+        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">
+                    <span id="medicalHistoryModalTitle">Nuevo Registro Clínico</span>
+                </h3>
+                <button onclick="closeMedicalHistoryModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+        
+            <form id="medicalHistoryForm" class="space-y-6">
+                <input type="hidden" id="medicalHistoryId">
+                
+                <!-- Información Básica -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-info-circle mr-2"></i>Información de la Consulta</h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Paciente *</label>
+                            <select id="medicalHistoryPatient" required class="w-full px-4 py-2 border rounded-lg">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Profesional *</label>
+                        <select id="medicalHistoryProfessional" required class="w-full px-4 py-2 border rounded-lg">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Consulta *</label>
+                            <input type="date" id="medicalHistoryDate" required class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Motivo y Síntomas -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de la Visita</label>
+                            <textarea id="medicalHistoryReason" rows="3" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Síntomas</label>
+                            <textarea id="medicalHistorySymptoms" rows="3" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico y Tratamiento -->
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-stethoscope mr-2"></i>Diagnóstico y Tratamiento</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico</label>
+                                <textarea id="medicalHistoryDiagnosis" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tratamiento Realizado</label>
+                                <textarea id="medicalHistoryTreatment" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Prescripciones/Medicamentos</label>
+                                <textarea id="medicalHistoryPrescriptions" rows="2" class="w-full px-4 py-2 border rounded-lg" placeholder="Ej: Ibuprofeno 400mg, 1 cada 8 horas"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información Dental -->
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-tooth mr-2"></i>Detalles Dentales</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Número de Diente</label>
+                                <input type="text" id="medicalHistoryTooth" class="w-full px-4 py-2 border rounded-lg" placeholder="Ej: 16, 21, etc.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Notas del Procedimiento</label>
+                                <input type="text" id="medicalHistoryProcedure" class="w-full px-4 py-2 border rounded-lg">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="medicalHistoryAnesthesia" class="mr-2">
+                                    <span class="text-sm font-medium text-gray-700">¿Se usó anestesia?</span>
+                                </label>
+                                <input type="text" id="medicalHistoryAnesthesiaType" class="w-full px-4 py-2 border rounded-lg mt-2" placeholder="Tipo de anestesia" style="display:none;">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Notas de Rayos X</label>
+                                <textarea id="medicalHistoryXray" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seguimiento -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Recomendaciones</label>
+                            <textarea id="medicalHistoryRecommendations" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                            <textarea id="medicalHistoryObservations" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Próxima Visita</label>
+                            <input type="date" id="medicalHistoryNextVisit" class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Costo Total (CLP)</label>
+                            <input type="number" id="medicalHistoryCost" class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                   
+                    <!-- Archivos Adjuntos -->
+                    <div class="bg-purple-50 p-4 rounded-lg" id="filesSection" style="display:none;">
+                        <h4 class="font-bold text-lg mb-4 text-gray-800">
+                            <i class="fas fa-paperclip mr-2"></i>Archivos Adjuntos
+                        </h4>
+                        
+                        <!-- Archivos existentes -->
+                        <div id="existingFiles" class="mb-4">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                        
+                        <!-- Subir nuevo archivo -->
+                        <div class="border-2 border-dashed border-purple-300 rounded-lg p-6 text-center">
+                            <input type="file" id="medicalHistoryFile" class="hidden" accept="image/*,.pdf,.doc,.docx" onchange="previewFile()">
+                            <label for="medicalHistoryFile" class="cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-purple-400 mb-2"></i>
+                                <p class="text-gray-600">Haz clic para subir archivo</p>
+                                <p class="text-xs text-gray-500 mt-1">Imágenes, PDF, Word (máx. 10MB)</p>
+                            </label>
+                            
+                            <!-- Preview del archivo seleccionado -->
+                            <div id="filePreview" class="mt-4" style="display:none;">
+                                <div class="bg-white p-3 rounded-lg flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file text-2xl text-blue-500 mr-3"></i>
+                                        <div class="text-left">
+                                            <p class="font-semibold text-sm" id="fileName"></p>
+                                            <p class="text-xs text-gray-500" id="fileSize"></p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="clearFilePreview()" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de archivo</label>
+                                    <select id="fileType" class="w-full px-4 py-2 border rounded-lg">
+                                        <option value="image">Imagen/Foto</option>
+                                        <option value="xray">Rayos X</option>
+                                        <option value="document">Documento</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Descripción (opcional)</label>
+                                    <input type="text" id="fileDescription" class="w-full px-4 py-2 border rounded-lg" placeholder="Ej: Radiografía panorámica">
+                                </div>
+                                
+                                <button type="button" onclick="uploadFile()" class="mt-3 bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600">
+                                    <i class="fas fa-upload mr-2"></i>Subir Archivo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- botones de Accion -->
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">
+                            <i class="fas fa-save mr-2"></i>Guardar Registro
+                        </button>
+                        <button type="button" onclick="closeMedicalHistoryModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+        </div>
+    </div>
+
+    <!-- Modal Ver Historial Detallado -->
+<div id="viewMedicalHistoryModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 overflow-y-auto py-8">
+    <div class="bg-white rounded-lg p-8 max-w-5xl w-full mx-4 fade-in max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-file-medical-alt mr-2"></i>Historial Clínico Detallado
+            </h3>
+            <div class="flex space-x-2">
+                <button onclick="printMedicalHistory()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-print mr-2"></i>Imprimir/PDF
+                </button>
+                <button onclick="closeViewMedicalHistoryModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="medicalHistoryDetails">
+            <!-- Se llena dinámicamente -->
+        </div>
+    </div>
+</div>
+
     <!-- ============================================ -->
     <!-- JAVASCRIPT -->
     <!-- ============================================ -->
@@ -1035,7 +1284,9 @@
                 loadMyAppointments();
             } else if (section === 'calendar') {
                 loadCalendar();
-            } else if (section === 'bookAppointment') {
+            }else if (section === 'medicalHistories') {
+                loadMedicalHistories();
+            }else if (section === 'bookAppointment') {
                 console.log('🚀 Llamando a loadBookAppointmentForm directamente...');
                 // Llamar directamente sin setTimeout
                 loadBookAppointmentForm().then(() => {
@@ -1173,33 +1424,33 @@
         }
 
        function showDayAppointments(dateString) {
-    console.log('🔍 Buscando citas para:', dateString);
-    console.log('📋 Todas las citas disponibles:', calendarAppointments);
+            console.log('🔍 Buscando citas para:', dateString);
+            console.log('📋 Todas las citas disponibles:', calendarAppointments);
+            
+            const dayAppointments = calendarAppointments.filter(apt => {
+                const aptDate = apt.appointment_date.split('T')[0];
+                console.log('   Comparando:', aptDate, '===', dateString, '?', aptDate === dateString);
+                return aptDate === dateString;
+            });
+            
+            console.log('✅ Citas encontradas:', dayAppointments.length);
+            
+            if (dayAppointments.length === 0) {
+                alert('No hay citas programadas para este día');
+                return;
+            }
     
-    const dayAppointments = calendarAppointments.filter(apt => {
-        const aptDate = apt.appointment_date.split('T')[0];
-        console.log('   Comparando:', aptDate, '===', dateString, '?', aptDate === dateString);
-        return aptDate === dateString;
-    });
-    
-    console.log('✅ Citas encontradas:', dayAppointments.length);
-    
-    if (dayAppointments.length === 0) {
-        alert('No hay citas programadas para este día');
-        return;
-    }
-    
-    // Crear mensaje con las citas
-    const mensaje = `Citas del ${dateString}:\n\n` + 
-        dayAppointments.map(apt => 
-            `• ${apt.start_time || '00:00'} - ${apt.patient?.first_name} ${apt.patient?.last_name}\n` +
-            `  ${apt.treatment?.name || 'Sin tratamiento'}\n` +
-            `  Dr(a). ${apt.dental_professional?.first_name || ''} ${apt.dental_professional?.last_name || ''}\n` +
-            `  Estado: ${getStatusText(apt.status)}`
-        ).join('\n\n');
-    
-    alert(mensaje);
-}
+            // Crear mensaje con las citas
+            const mensaje = `Citas del ${dateString}:\n\n` + 
+                dayAppointments.map(apt => 
+                    `• ${apt.start_time || '00:00'} - ${apt.patient?.first_name} ${apt.patient?.last_name}\n` +
+                    `  ${apt.treatment?.name || 'Sin tratamiento'}\n` +
+                    `  Dr(a). ${apt.dental_professional?.first_name || ''} ${apt.dental_professional?.last_name || ''}\n` +
+                    `  Estado: ${getStatusText(apt.status)}`
+                ).join('\n\n');
+            
+            alert(mensaje);
+        }
 
         function previousMonth() {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
@@ -1214,6 +1465,684 @@
         function goToToday() {
             currentCalendarDate = new Date();
             renderCalendar();
+        }
+
+        // ========================================
+        // HISTORIAL CLÍNICO
+        // ========================================
+        let allMedicalHistories = [];
+
+        async function loadMedicalHistories() {
+            try {
+                const response = await apiRequest('/medical-histories');
+                
+                if (response && response.data) {
+                    if (Array.isArray(response.data.data)) {
+                        allMedicalHistories = response.data.data;
+                    } else if (Array.isArray(response.data)) {
+                        allMedicalHistories = response.data;
+                    } else {
+                        allMedicalHistories = [];
+                    }
+                } else if (Array.isArray(response)) {
+                    allMedicalHistories = response;
+                } else {
+                    allMedicalHistories = [];
+                }
+                
+                renderMedicalHistoriesGrid(allMedicalHistories);
+                await loadHistoryFilterOptions();
+            } catch (error) {
+                console.error('Error cargando historiales:', error);
+                alert('Error al cargar historiales clínicos');
+            }
+        }
+
+        function renderMedicalHistoriesGrid(histories) {
+            const grid = document.getElementById('medicalHistoriesGrid');
+            
+            if (!histories || histories.length === 0) {
+                grid.innerHTML = '<p class="text-gray-500 text-center py-8">No hay registros clínicos</p>';
+                return;
+            }
+            
+            grid.innerHTML = histories.map(history => `
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-800">${history.patient?.first_name} ${history.patient?.last_name}</h3>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-user-md mr-1"></i>Dr(a). ${history.dental_professional?.first_name} ${history.dental_professional?.last_name}
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-calendar mr-1"></i>${history.consultation_date}
+                            </p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="viewMedicalHistory(${history.id})" class="text-blue-500 hover:text-blue-700" title="Ver detalles">
+                                <i class="fas fa-eye text-xl"></i>
+                            </button>
+                            <button onclick="editMedicalHistory(${history.id})" class="text-green-500 hover:text-green-700" title="Editar">
+                                <i class="fas fa-edit text-xl"></i>
+                            </button>
+                            <button onclick="deleteMedicalHistory(${history.id})" class="text-red-500 hover:text-red-700" title="Eliminar">
+                                <i class="fas fa-trash text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${history.diagnosis ? `
+                        <div class="mb-2">
+                            <p class="text-sm font-semibold text-gray-700">Diagnóstico:</p>
+                            <p class="text-sm text-gray-600">${history.diagnosis}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${history.treatment_performed ? `
+                        <div class="mb-2">
+                            <p class="text-sm font-semibold text-gray-700">Tratamiento:</p>
+                            <p class="text-sm text-gray-600">${history.treatment_performed}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${history.tooth_number ? `
+                        <div class="mb-2">
+                            <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-tooth mr-1"></i>Diente: ${history.tooth_number}
+                            </span>
+                        </div>
+                    ` : ''}
+                    
+                    ${history.files && history.files.length > 0 ? `
+                        <div class="mt-3 flex items-center text-sm text-blue-600">
+                            <i class="fas fa-paperclip mr-2"></i>${history.files.length} archivo(s) adjunto(s)
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function loadHistoryFilterOptions() {
+            try {
+                const response = await apiRequest('/patients');
+                const patientsData = response?.data?.data || response?.data || (Array.isArray(response) ? response : []);
+                
+                const select = document.getElementById('filterHistoryPatient');
+                select.innerHTML = '<option value="">Todos los pacientes</option>' +
+                    (Array.isArray(patientsData) ? patientsData.map(p => 
+                        `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`
+                    ).join('') : '');
+            } catch (error) {
+                console.error('Error cargando pacientes para filtro:', error);
+            }
+        }
+
+        function filterMedicalHistories() {
+            const patientId = document.getElementById('filterHistoryPatient').value;
+            const dateFrom = document.getElementById('filterHistoryDateFrom').value;
+            const dateTo = document.getElementById('filterHistoryDateTo').value;
+            
+            let filtered = allMedicalHistories;
+            
+            if (patientId) {
+                filtered = filtered.filter(h => h.patient_id == patientId);
+            }
+            
+            if (dateFrom) {
+                filtered = filtered.filter(h => h.consultation_date >= dateFrom);
+            }
+            
+            if (dateTo) {
+                filtered = filtered.filter(h => h.consultation_date <= dateTo);
+            }
+            
+            renderMedicalHistoriesGrid(filtered);
+        }
+
+        async function openMedicalHistoryModal(id = null) {
+            document.getElementById('medicalHistoryModalTitle').textContent = id ? 'Editar Registro Clínico' : 'Nuevo Registro Clínico';
+            document.getElementById('medicalHistoryId').value = id || '';
+            
+            // Cargar opciones
+            try {
+                const [patients, professionals] = await Promise.all([
+                    apiRequest('/patients'),
+                    apiRequest('/professionals')
+                ]);
+                
+                const patientsData = patients?.data?.data || patients?.data || (Array.isArray(patients) ? patients : []);
+                const professionalsData = professionals?.data?.data || professionals?.data || (Array.isArray(professionals) ? professionals : []);
+                
+                document.getElementById('medicalHistoryPatient').innerHTML = 
+                    '<option value="">Seleccionar...</option>' +
+                    (Array.isArray(patientsData) ? patientsData.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('') : '');
+                
+                document.getElementById('medicalHistoryProfessional').innerHTML = 
+                    '<option value="">Seleccionar...</option>' +
+                    (Array.isArray(professionalsData) ? professionalsData.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('') : '');
+                
+                if (id) {
+                    const history = allMedicalHistories.find(h => h.id == id);
+                    if (history) {
+                        document.getElementById('medicalHistoryPatient').value = history.patient_id;
+                        document.getElementById('medicalHistoryProfessional').value = history.dental_professional_id;
+                        document.getElementById('medicalHistoryDate').value = history.consultation_date;
+                        document.getElementById('medicalHistoryReason').value = history.reason_for_visit || '';
+                        document.getElementById('medicalHistorySymptoms').value = history.symptoms || '';
+                        document.getElementById('medicalHistoryDiagnosis').value = history.diagnosis || '';
+                        document.getElementById('medicalHistoryTreatment').value = history.treatment_performed || '';
+                        document.getElementById('medicalHistoryPrescriptions').value = history.prescriptions || '';
+                        document.getElementById('medicalHistoryTooth').value = history.tooth_number || '';
+                        document.getElementById('medicalHistoryProcedure').value = history.procedure_notes || '';
+                        document.getElementById('medicalHistoryAnesthesia').checked = history.anesthesia_used;
+                        document.getElementById('medicalHistoryAnesthesiaType').value = history.anesthesia_type || '';
+                        document.getElementById('medicalHistoryAnesthesiaType').style.display = history.anesthesia_used ? 'block' : 'none';
+                        document.getElementById('medicalHistoryXray').value = history.xray_notes || '';
+                        document.getElementById('medicalHistoryRecommendations').value = history.recommendations || '';
+                        document.getElementById('medicalHistoryObservations').value = history.observations || '';
+                        document.getElementById('medicalHistoryNextVisit').value = history.next_visit_date || '';
+                        document.getElementById('medicalHistoryCost').value = history.total_cost || '';
+                    }
+                } else {
+                    document.getElementById('medicalHistoryForm').reset();
+                    document.getElementById('medicalHistoryDate').value = new Date().toISOString().split('T')[0];
+                }
+                 // Mostrar sección de archivos si es edición
+                if (id) {
+                    currentHistoryId = id;
+                    document.getElementById('filesSection').style.display = 'block';
+                    loadExistingFiles(id);
+                } else {
+                    currentHistoryId = null;
+                    document.getElementById('filesSection').style.display = 'none';
+                    document.getElementById('existingFiles').innerHTML = '';
+                }
+                document.getElementById('medicalHistoryModal').classList.add('active');
+            } catch (error) {
+                console.error('Error abriendo modal:', error);
+                alert('Error al cargar datos del formulario');
+            }
+        }
+
+        function closeMedicalHistoryModal() {
+            document.getElementById('medicalHistoryModal').classList.remove('active');
+            document.getElementById('medicalHistoryForm').reset();
+        }
+
+        // Toggle anestesia type input
+        document.getElementById('medicalHistoryAnesthesia').addEventListener('change', function() {
+            document.getElementById('medicalHistoryAnesthesiaType').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('medicalHistoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('medicalHistoryId').value;
+            const data = {
+                patient_id: document.getElementById('medicalHistoryPatient').value,
+                dental_professional_id: document.getElementById('medicalHistoryProfessional').value,
+                consultation_date: document.getElementById('medicalHistoryDate').value,
+                reason_for_visit: document.getElementById('medicalHistoryReason').value,
+                symptoms: document.getElementById('medicalHistorySymptoms').value,
+                diagnosis: document.getElementById('medicalHistoryDiagnosis').value,
+                treatment_performed: document.getElementById('medicalHistoryTreatment').value,
+                prescriptions: document.getElementById('medicalHistoryPrescriptions').value,
+                tooth_number: document.getElementById('medicalHistoryTooth').value,
+                procedure_notes: document.getElementById('medicalHistoryProcedure').value,
+                anesthesia_used: document.getElementById('medicalHistoryAnesthesia').checked,
+                anesthesia_type: document.getElementById('medicalHistoryAnesthesiaType').value,
+                xray_notes: document.getElementById('medicalHistoryXray').value,
+                recommendations: document.getElementById('medicalHistoryRecommendations').value,
+                observations: document.getElementById('medicalHistoryObservations').value,
+                next_visit_date: document.getElementById('medicalHistoryNextVisit').value,
+                total_cost: document.getElementById('medicalHistoryCost').value
+            };
+            
+            try {
+                const endpoint = id ? `/medical-histories/${id}` : `/medical-histories`;
+                const method = id ? 'PUT' : 'POST';
+                
+                const response = await apiRequest(endpoint, method, data);
+                
+               if (response.success) {
+            if (!id) {
+                // Si es nuevo registro, mostrar sección de archivos
+                currentHistoryId = response.data.id;
+                document.getElementById('filesSection').style.display = 'block';
+                alert('Registro creado correctamente. Ahora puedes subir archivos.');
+            } else {
+                alert('Registro actualizado correctamente');
+                closeMedicalHistoryModal();
+                loadMedicalHistories();
+            }
+               }
+            } catch (error) {
+                console.error('Error guardando historial:', error);
+                alert('Error al guardar el registro');
+            }
+        });
+
+        function editMedicalHistory(id) {
+            openMedicalHistoryModal(id);
+        }
+
+        async function deleteMedicalHistory(id) {
+            if (!confirm('¿Está seguro de eliminar este registro clínico?')) return;
+            
+            try {
+                const response = await apiRequest(`/medical-histories/${id}`, 'DELETE');
+                
+                if (response.success) {
+                    alert('Registro eliminado correctamente');
+                    loadMedicalHistories();
+                } else {
+                    alert('Error al eliminar el registro');
+                }
+            } catch (error) {
+                console.error('Error eliminando historial:', error);
+                alert('Error al eliminar el registro');
+            }
+        }
+
+        async function viewMedicalHistory(id) {
+            // Por ahora abre el modal de edición
+            alert('Vista detallada con archivos - En desarrollo. Por ahora puedes editar el registro.');
+            editMedicalHistory(id);
+        }
+        // ========================================
+        // GESTIÓN DE ARCHIVOS
+        // ========================================
+        let currentHistoryId = null;
+
+        function previewFile() {
+            const fileInput = document.getElementById('medicalHistoryFile');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            // Validar tamaño (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. Máximo 10MB');
+                fileInput.value = '';
+                return;
+            }
+            
+            // Mostrar preview
+            document.getElementById('filePreview').style.display = 'block';
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            
+            // Autodetectar tipo de archivo
+            const fileType = document.getElementById('fileType');
+            if (file.type.startsWith('image/')) {
+                fileType.value = 'image';
+            } else if (file.type === 'application/pdf' || file.name.toLowerCase().includes('doc')) {
+                fileType.value = 'document';
+            }
+        }
+
+        function clearFilePreview() {
+            document.getElementById('medicalHistoryFile').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileDescription').value = '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        async function uploadFile() {
+        if (!currentHistoryId) {
+            alert('Primero debes guardar el registro clínico antes de subir archivos');
+            return;
+        }
+        
+        const fileInput = document.getElementById('medicalHistoryFile');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Por favor selecciona un archivo');
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('file_type', document.getElementById('fileType').value);
+        formData.append('description', document.getElementById('fileDescription').value);
+        
+        try {
+            const response = await fetch(`${API_URL}/medical-histories/${currentHistoryId}/files`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Archivo subido correctamente');
+                clearFilePreview();
+                loadExistingFiles(currentHistoryId);
+            } else {
+                alert('Error: ' + (result.message || 'No se pudo subir el archivo'));
+            }
+        } catch (error) {
+            console.error('Error subiendo archivo:', error);
+            alert('Error al subir el archivo');
+        }
+    }
+
+        async function loadExistingFiles(historyId) {
+            try {
+                const response = await apiRequest(`/medical-histories/${historyId}`);
+                
+                if (response.success && response.data.files) {
+                    const files = response.data.files;
+                    const container = document.getElementById('existingFiles');
+                    
+                    if (files.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500 text-sm">No hay archivos adjuntos</p>';
+                        return;
+                    }
+            
+                container.innerHTML = `
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Archivos adjuntos (${files.length}):</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        ${files.map(file => `
+                            <div class="border rounded-lg p-3 flex items-center justify-between bg-white">
+                                <div class="flex items-center flex-1">
+                                    <i class="fas ${getFileIcon(file.file_type)} text-2xl mr-3 ${getFileColor(file.file_type)}"></i>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold truncate">${file.file_name}</p>
+                                        <p class="text-xs text-gray-500">${file.description || 'Sin descripción'}</p>
+                                        <p class="text-xs text-gray-400">${formatFileSize(file.file_size)}</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2 ml-2">
+                                    <a href="${file.url || API_URL.replace('/api', '') + '/storage/' + file.file_path}" target="_blank" 
+                                    class="text-blue-500 hover:text-blue-700" title="Ver/Descargar">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <button onclick="deleteFile(${historyId}, ${file.id})" 
+                                            class="text-red-500 hover:text-red-700" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error cargando archivos:', error);
+        }
+    }
+
+        function getFileIcon(fileType) {
+            const icons = {
+                'image': 'fa-image',
+                'xray': 'fa-x-ray',
+                'document': 'fa-file-pdf'
+            };
+            return icons[fileType] || 'fa-file';
+        }
+
+        function getFileColor(fileType) {
+            const colors = {
+                'image': 'text-green-500',
+                'xray': 'text-blue-500',
+                'document': 'text-red-500'
+            };
+            return colors[fileType] || 'text-gray-500';
+        }
+
+        async function deleteFile(historyId, fileId) {
+            if (!confirm('¿Está seguro de eliminar este archivo?')) return;
+            
+            try {
+                const response = await apiRequest(`/medical-histories/${historyId}/files/${fileId}`, 'DELETE');
+                
+                if (response.success) {
+                    alert('Archivo eliminado correctamente');
+                    loadExistingFiles(historyId);
+                } else {
+                    alert('Error al eliminar el archivo');
+                }
+            } catch (error) {
+                console.error('Error eliminando archivo:', error);
+                alert('Error al eliminar el archivo');
+            }
+        }
+
+        async function viewMedicalHistory(id) {
+            try {
+                const response = await apiRequest(`/medical-histories/${id}`);
+                
+                if (!response.success) {
+                    alert('Error al cargar el historial');
+                    return;
+                }
+                
+                const history = response.data;
+                const detailsContainer = document.getElementById('medicalHistoryDetails');
+                
+                detailsContainer.innerHTML = `
+                    <!-- Información del Paciente -->
+                    <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-blue-800">
+                                    <i class="fas fa-user mr-2"></i>Información del Paciente
+                                </h4>
+                                <p class="mb-2"><strong>Nombre:</strong> ${history.patient?.first_name} ${history.patient?.last_name}</p>
+                                <p class="mb-2"><strong>RUT:</strong> ${history.patient?.rut || 'N/A'}</p>
+                                <p class="mb-2"><strong>Teléfono:</strong> ${history.patient?.phone || 'N/A'}</p>
+                                <p class="mb-2"><strong>Email:</strong> ${history.patient?.email || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-blue-800">
+                                    <i class="fas fa-calendar-check mr-2"></i>Información de la Consulta
+                                </h4>
+                                <p class="mb-2"><strong>Fecha:</strong> ${history.consultation_date}</p>
+                                <p class="mb-2"><strong>Profesional:</strong> Dr(a). ${history.dental_professional?.first_name} ${history.dental_professional?.last_name}</p>
+                                <p class="mb-2"><strong>Especialidad:</strong> ${history.dental_professional?.specialty || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motivo y Síntomas -->
+                    ${history.reason_for_visit || history.symptoms ? `
+                        <div class="mb-6">
+                            <h4 class="font-bold text-lg mb-3 text-gray-800">
+                                <i class="fas fa-notes-medical mr-2"></i>Motivo de Consulta y Síntomas
+                            </h4>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                ${history.reason_for_visit ? `
+                                    <div class="mb-3">
+                                        <p class="font-semibold text-gray-700">Motivo de la Visita:</p>
+                                        <p class="text-gray-600">${history.reason_for_visit}</p>
+                                    </div>
+                                ` : ''}
+                                ${history.symptoms ? `
+                                    <div>
+                                        <p class="font-semibold text-gray-700">Síntomas:</p>
+                                        <p class="text-gray-600">${history.symptoms}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Diagnóstico y Tratamiento -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-3 text-gray-800">
+                            <i class="fas fa-stethoscope mr-2"></i>Diagnóstico y Tratamiento
+                        </h4>
+                        <div class="bg-green-50 p-4 rounded-lg space-y-3">
+                            ${history.diagnosis ? `
+                                <div>
+                                    <p class="font-semibold text-green-800">Diagnóstico:</p>
+                                    <p class="text-gray-700">${history.diagnosis}</p>
+                                </div>
+                            ` : ''}
+                            ${history.treatment_performed ? `
+                                <div>
+                                    <p class="font-semibold text-green-800">Tratamiento Realizado:</p>
+                                    <p class="text-gray-700">${history.treatment_performed}</p>
+                                </div>
+                            ` : ''}
+                            ${history.prescriptions ? `
+                                <div>
+                                    <p class="font-semibold text-green-800">Prescripciones/Medicamentos:</p>
+                                    <p class="text-gray-700">${history.prescriptions}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Detalles Dentales -->
+                    ${history.tooth_number || history.procedure_notes || history.anesthesia_used || history.xray_notes ? `
+                        <div class="mb-6">
+                            <h4 class="font-bold text-lg mb-3 text-gray-800">
+                                <i class="fas fa-tooth mr-2"></i>Detalles Dentales
+                            </h4>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <div class="grid grid-cols-2 gap-4">
+                                    ${history.tooth_number ? `
+                                        <div>
+                                            <p class="font-semibold text-purple-800">Diente Tratado:</p>
+                                            <p class="text-gray-700">Número ${history.tooth_number}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${history.anesthesia_used ? `
+                                        <div>
+                                            <p class="font-semibold text-purple-800">Anestesia:</p>
+                                            <p class="text-gray-700">${history.anesthesia_type || 'Sí (tipo no especificado)'}</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                ${history.procedure_notes ? `
+                                    <div class="mt-3">
+                                        <p class="font-semibold text-purple-800">Notas del Procedimiento:</p>
+                                        <p class="text-gray-700">${history.procedure_notes}</p>
+                                    </div>
+                                ` : ''}
+                                ${history.xray_notes ? `
+                                    <div class="mt-3">
+                                        <p class="font-semibold text-purple-800">Notas de Rayos X:</p>
+                                        <p class="text-gray-700">${history.xray_notes}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Seguimiento -->
+                    ${history.recommendations || history.observations || history.next_visit_date ? `
+                        <div class="mb-6">
+                            <h4 class="font-bold text-lg mb-3 text-gray-800">
+                                <i class="fas fa-clipboard-list mr-2"></i>Seguimiento
+                            </h4>
+                            <div class="bg-yellow-50 p-4 rounded-lg space-y-3">
+                                ${history.recommendations ? `
+                                    <div>
+                                        <p class="font-semibold text-yellow-800">Recomendaciones:</p>
+                                        <p class="text-gray-700">${history.recommendations}</p>
+                                    </div>
+                                ` : ''}
+                                ${history.observations ? `
+                                    <div>
+                                        <p class="font-semibold text-yellow-800">Observaciones:</p>
+                                        <p class="text-gray-700">${history.observations}</p>
+                                    </div>
+                                ` : ''}
+                                ${history.next_visit_date ? `
+                                    <div>
+                                        <p class="font-semibold text-yellow-800">Próxima Visita:</p>
+                                        <p class="text-gray-700">${history.next_visit_date}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Costo -->
+                    ${history.total_cost ? `
+                        <div class="mb-6">
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <p class="font-semibold text-orange-800">Costo Total:</p>
+                                <p class="text-2xl font-bold text-orange-600">$${Number(history.total_cost).toLocaleString('es-CL')}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Archivos Adjuntos -->
+                    ${history.files && history.files.length > 0 ? `
+                        <div class="mb-6">
+                            <h4 class="font-bold text-lg mb-3 text-gray-800">
+                                <i class="fas fa-paperclip mr-2"></i>Archivos Adjuntos (${history.files.length})
+                            </h4>
+                            <div class="grid grid-cols-3 gap-4">
+                                ${history.files.map(file => `
+                                    <div class="border rounded-lg p-3 bg-white hover:shadow-md transition">
+                                        <div class="flex items-center mb-2">
+                                            <i class="fas ${getFileIcon(file.file_type)} text-3xl mr-3 ${getFileColor(file.file_type)}"></i>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-semibold truncate">${file.file_name}</p>
+                                                <p class="text-xs text-gray-500">${formatFileSize(file.file_size)}</p>
+                                            </div>
+                                        </div>
+                                        ${file.description ? `<p class="text-xs text-gray-600 mb-2">${file.description}</p>` : ''}
+                                        <a href="${file.url || API_URL.replace('/api', '') + '/storage/' + file.file_path}" 
+                                        target="_blank" 
+                                        class="block text-center bg-blue-500 text-white text-sm py-2 rounded hover:bg-blue-600">
+                                            <i class="fas fa-download mr-1"></i>Ver/Descargar
+                                        </a>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Botones de Acción -->
+                    <div class="flex space-x-4 pt-4 border-t">
+                        <button onclick="editMedicalHistory(${history.id}); closeViewMedicalHistoryModal();" 
+                                class="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600">
+                            <i class="fas fa-edit mr-2"></i>Editar Registro
+                        </button>
+                        <button onclick="closeViewMedicalHistoryModal()" 
+                                class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('viewMedicalHistoryModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error cargando detalles:', error);
+                alert('Error al cargar los detalles del historial');
+            }
+        }
+
+        function closeViewMedicalHistoryModal() {
+            document.getElementById('viewMedicalHistoryModal').classList.remove('active');
+        }
+
+       async function printMedicalHistory() {
+            const historyId = document.getElementById('medicalHistoryDetails').querySelector('[onclick*="editMedicalHistory"]')?.getAttribute('onclick')?.match(/\d+/)?.[0];
+            
+            if (!historyId) {
+                alert('Error al obtener ID del historial');
+                return;
+            }
+            
+            // Descargar PDF
+            window.open(`${API_URL}/reports/medical-history/${historyId}?token=${authToken}`, '_blank');
         }
 
         // ========================================

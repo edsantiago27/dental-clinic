@@ -7,7 +7,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfessionalController;
 use App\Http\Controllers\TreatmentController;
 use App\Http\Controllers\MedicalHistoryController;
-
+use App\Http\Controllers\ReportController; 
 
 // Rutas públicas
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Profesionales
     Route::get('/professionals/{id}', [ProfessionalController::class, 'show']);
- Route::post('/professionals', [ProfessionalController::class, 'store']);
+    Route::post('/professionals', [ProfessionalController::class, 'store']);
     Route::put('/professionals/{id}', [ProfessionalController::class, 'update']);
     Route::delete('/professionals/{id}', [ProfessionalController::class, 'destroy']);
 
@@ -56,7 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/treatments/{id}', [TreatmentController::class, 'update']);
     Route::delete('/treatments/{id}', [TreatmentController::class, 'destroy']);
     Route::get('/treatments/{id}', [TreatmentController::class, 'show']);
- Route::get('/medical-histories', [MedicalHistoryController::class, 'index']);
+    Route::get('/medical-histories', [MedicalHistoryController::class, 'index']);
     Route::get('/medical-histories/{id}', [MedicalHistoryController::class, 'show']);
     Route::post('/medical-histories', [MedicalHistoryController::class, 'store']);
     Route::put('/medical-histories/{id}', [MedicalHistoryController::class, 'update']);
@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Archivos
     Route::post('/medical-histories/{id}/files', [MedicalHistoryController::class, 'uploadFile']);
     Route::delete('/medical-histories/{historyId}/files/{fileId}', [MedicalHistoryController::class, 'deleteFile']);
+
     // Historial Clínico
     Route::get('/patients/{patientId}/medical-history', [MedicalHistoryController::class, 'index']);
     Route::post('/medical-history', [MedicalHistoryController::class, 'store']);
@@ -73,4 +74,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/medical-history/{historyId}/upload-image', [MedicalHistoryController::class, 'uploadImage']);
     Route::delete('/medical-images/{imageId}', [MedicalHistoryController::class, 'deleteImage']);
 
+    
+
 });
+// Reportes PDF
+    Route::get('/reports/medical-history/{id}', [ReportController::class, 'medicalHistoryPdf']);
+    Route::get('/reports/patient-history/{patientId}', [ReportController::class, 'patientHistoryPdf']);
+    Route::get('/reports/appointments', [ReportController::class, 'appointmentsPdf']);

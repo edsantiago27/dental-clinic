@@ -33,8 +33,8 @@ class MedicalHistory extends Model
     ];
 
     protected $casts = [
-        'consultation_date' => 'date',
-        'next_visit_date' => 'dat e',
+        'consultation_date' => 'datetime',
+        'next_visit_date' => 'datetime',
         'anesthesia_used' => 'boolean',
         'total_cost' => 'decimal:2',
     ];
