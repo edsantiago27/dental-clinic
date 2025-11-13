@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Route::get('/auth/me', [AuthController::class, 'me']);
  Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
     // Citas
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::post('/appointments', [AppointmentController::class, 'store']);
@@ -35,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/appointments/{id}/confirm', [AppointmentController::class, 'confirm']);
     Route::put('/appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
     Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
-Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
 
     // Pacientes
     Route::get('/patients', [PatientController::class, 'index']);
@@ -55,7 +56,15 @@ Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
     Route::put('/treatments/{id}', [TreatmentController::class, 'update']);
     Route::delete('/treatments/{id}', [TreatmentController::class, 'destroy']);
     Route::get('/treatments/{id}', [TreatmentController::class, 'show']);
-
+ Route::get('/medical-histories', [MedicalHistoryController::class, 'index']);
+    Route::get('/medical-histories/{id}', [MedicalHistoryController::class, 'show']);
+    Route::post('/medical-histories', [MedicalHistoryController::class, 'store']);
+    Route::put('/medical-histories/{id}', [MedicalHistoryController::class, 'update']);
+    Route::delete('/medical-histories/{id}', [MedicalHistoryController::class, 'destroy']);
+    
+    // Archivos
+    Route::post('/medical-histories/{id}/files', [MedicalHistoryController::class, 'uploadFile']);
+    Route::delete('/medical-histories/{historyId}/files/{fileId}', [MedicalHistoryController::class, 'deleteFile']);
     // Historial Clínico
     Route::get('/patients/{patientId}/medical-history', [MedicalHistoryController::class, 'index']);
     Route::post('/medical-history', [MedicalHistoryController::class, 'store']);

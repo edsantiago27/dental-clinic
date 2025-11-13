@@ -183,6 +183,9 @@
                     <button onclick="showSection('treatments')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
                         <i class="fas fa-tooth mr-2"></i>Tratamientos
                     </button>
+                    <button onclick="showSection('calendar')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-calendar-alt mr-2"></i>Calendario
+                    </button>
                 </div>
             </div>
         </div>
@@ -354,6 +357,73 @@
                 <!-- Treatments Grid -->
                 <div id="treatmentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECCIÓN CALENDARIO (ADMIN) -->
+            <!-- ============================================ -->
+            <div id="calendarSection" class="section" style="display: none;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Calendario de Citas</h2>
+                    <button onclick="openAppointmentModal()" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+                        <i class="fas fa-plus mr-2"></i>Nueva Cita
+                    </button>
+                </div>
+
+                <!-- Controles del Calendario -->
+                <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                    <div class="flex items-center justify-between">
+                        <button onclick="previousMonth()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <h3 id="calendarMonthYear" class="text-xl font-bold"></h3>
+                        <button onclick="nextMonth()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <button onclick="goToToday()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        <i class="fas fa-calendar-day mr-2"></i>Hoy
+                    </button>
+                </div>
+
+                <!-- Grid del Calendario -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <!-- Días de la semana -->
+                    <div class="grid grid-cols-7 gap-2 mb-2">
+                        <div class="text-center font-bold text-gray-700 py-2">Domingo</div>
+                        <div class="text-center font-bold text-gray-700 py-2">Lunes</div>
+                        <div class="text-center font-bold text-gray-700 py-2">Martes</div>
+                        <div class="text-center font-bold text-gray-700 py-2">Miércoles</div>
+                        <div class="text-center font-bold text-gray-700 py-2">Jueves</div>
+                        <div class="text-center font-bold text-gray-700 py-2">Viernes</div>
+                        <div class="text-center font-bold text-gray-700 py-2">Sábado</div>
+                    </div>
+                    
+                    <!-- Días del mes -->
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="mt-4 flex items-center space-x-4 text-sm">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-blue-200 rounded mr-2"></div>
+                        <span>Pendiente</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-green-200 rounded mr-2"></div>
+                        <span>Confirmada</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-gray-200 rounded mr-2"></div>
+                        <span>Completada</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-red-200 rounded mr-2"></div>
+                        <span>Cancelada</span>
+                    </div>
                 </div>
             </div>
 
@@ -890,11 +960,16 @@
         // CONFIGURAR NAVEGACIÓN SEGÚN ROL
         // ========================================
         function setupNavigation() {
-            const navTabs = document.querySelector('.max-w-7xl.mx-auto.px-4 .flex.space-x-8');
+            const navContainer = document.querySelector('.max-w-7xl.mx-auto.px-4 .flex.space-x-8');
             
-            if (currentUser.role === 'patient') {
+            if (!navContainer) {
+                console.error('❌ No se encontró el contenedor de navegación');
+                return;
+            }
+            
+            if (currentUser && currentUser.role === 'patient') {
                 // Vista para pacientes
-                navTabs.innerHTML = `
+                navContainer.innerHTML = `
                     <button onclick="showSection('dashboard')" class="nav-tab py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium">
                         <i class="fas fa-home mr-2"></i>Inicio
                     </button>
@@ -906,24 +981,9 @@
                     </button>
                 `;
             } else {
-                // Vista para admin (ya existe)
-                navTabs.innerHTML = `
-                    <button onclick="showSection('dashboard')" class="nav-tab py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium">
-                        <i class="fas fa-home mr-2"></i>Dashboard
-                    </button>
-                    <button onclick="showSection('appointments')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-calendar-alt mr-2"></i>Citas
-                    </button>
-                    <button onclick="showSection('patients')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-users mr-2"></i>Pacientes
-                    </button>
-                    <button onclick="showSection('professionals')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-user-md mr-2"></i>Profesionales
-                    </button>
-                    <button onclick="showSection('treatments')" class="nav-tab py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-tooth mr-2"></i>Tratamientos
-                    </button>
-                `;
+                // Vista para admin - NO cambiar el HTML, solo asegurarse de que esté visible
+                console.log('✅ Manteniendo navegación de admin');
+                // No hacemos nada, dejamos el HTML original
             }
         }
 
@@ -973,6 +1033,8 @@
                 loadTreatments();
             } else if (section === 'myAppointments') {
                 loadMyAppointments();
+            } else if (section === 'calendar') {
+                loadCalendar();
             } else if (section === 'bookAppointment') {
                 console.log('🚀 Llamando a loadBookAppointmentForm directamente...');
                 // Llamar directamente sin setTimeout
@@ -982,6 +1044,176 @@
                     console.error('❌ Error en loadBookAppointmentForm:', err);
                 });
             }
+        }
+
+        // ========================================
+        // CALENDARIO
+        // ========================================
+        let currentCalendarDate = new Date();
+        let calendarAppointments = [];
+
+        async function loadCalendar() {
+            console.log('📅 Cargando calendario...');
+            try {
+                // Cargar todas las citas
+                const response = await apiRequest('/appointments');
+                console.log('📦 Respuesta de citas:', response);
+                
+                // Normalizar datos (manejar paginación)
+                if (response && response.data) {
+                    if (response.data.data) {
+                        // Paginación de Laravel
+                        calendarAppointments = response.data.data;
+                    } else if (Array.isArray(response.data)) {
+                        // Array directo
+                        calendarAppointments = response.data;
+                    } else {
+                        calendarAppointments = [];
+                    }
+                } else if (Array.isArray(response)) {
+                    calendarAppointments = response;
+                } else {
+                    calendarAppointments = [];
+                }
+                
+                console.log('📊 Total de citas cargadas:', calendarAppointments.length);
+                console.log('📋 Citas:', calendarAppointments);
+                
+                renderCalendar();
+            } catch (error) {
+                console.error('❌ Error cargando calendario:', error);
+            }
+        }
+
+        function renderCalendar() {
+            console.log('🎨 Renderizando calendario...');
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // Actualizar título
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
+            
+            // Obtener primer y último día del mes
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            console.log(`📆 Mostrando: ${monthNames[month]} ${year} (${daysInMonth} días)`);
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            // Días vacíos antes del primer día del mes
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'min-h-24 bg-gray-50 rounded-lg p-2';
+                grid.appendChild(emptyDay);
+            }
+            
+            // Días del mes
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDate = new Date(year, month, day);
+                const dateString = currentDate.toISOString().split('T')[0];
+                
+                // Filtrar citas de este día
+                const dayAppointments = calendarAppointments.filter(apt => {
+                    // Comparar solo la fecha, ignorando la hora
+                   const aptDate = apt.appointment_date.split('T')[0];  // ← Falta extraer solo la fecha
+                    return aptDate === dateString;
+                });
+                
+                if (dayAppointments.length > 0) {
+                    console.log(`📌 ${dateString}: ${dayAppointments.length} cita(s)`);
+                }
+                
+                // Verificar si es hoy
+                const today = new Date();
+                const isToday = currentDate.toDateString() === today.toDateString();
+                
+                const dayCell = document.createElement('div');
+                dayCell.className = `min-h-24 bg-white border-2 rounded-lg p-2 hover:bg-gray-50 transition cursor-pointer ${
+                    isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                }`;
+                dayCell.onclick = () => showDayAppointments(dateString);
+                
+                let dayHTML = `
+                    <div class="font-bold text-sm mb-1 ${isToday ? 'text-blue-600' : 'text-gray-700'}">
+                        ${day}
+                    </div>
+                `;
+                
+                // Mostrar citas del día (máximo 3)
+                dayAppointments.slice(0, 3).forEach(apt => {
+                    const statusColors = {
+                        'Pending': 'bg-blue-200 text-blue-800',
+                        'Confirmed': 'bg-green-200 text-green-800',
+                        'Completed': 'bg-gray-200 text-gray-800',
+                        'Cancelled': 'bg-red-200 text-red-800'
+                    };
+                    
+                    dayHTML += `
+                        <div class="text-xs p-1 mb-1 rounded ${statusColors[apt.status] || 'bg-gray-200'} truncate">
+                            ${apt.start_time || '00:00'} - ${apt.patient?.first_name || 'Sin paciente'}
+                        </div>
+                    `;
+                });
+                
+                if (dayAppointments.length > 3) {
+                    dayHTML += `<div class="text-xs text-gray-500">+${dayAppointments.length - 3} más</div>`;
+                }
+                
+                dayCell.innerHTML = dayHTML;
+                grid.appendChild(dayCell);
+            }
+            
+            console.log('✅ Calendario renderizado');
+        }
+
+       function showDayAppointments(dateString) {
+    console.log('🔍 Buscando citas para:', dateString);
+    console.log('📋 Todas las citas disponibles:', calendarAppointments);
+    
+    const dayAppointments = calendarAppointments.filter(apt => {
+        const aptDate = apt.appointment_date.split('T')[0];
+        console.log('   Comparando:', aptDate, '===', dateString, '?', aptDate === dateString);
+        return aptDate === dateString;
+    });
+    
+    console.log('✅ Citas encontradas:', dayAppointments.length);
+    
+    if (dayAppointments.length === 0) {
+        alert('No hay citas programadas para este día');
+        return;
+    }
+    
+    // Crear mensaje con las citas
+    const mensaje = `Citas del ${dateString}:\n\n` + 
+        dayAppointments.map(apt => 
+            `• ${apt.start_time || '00:00'} - ${apt.patient?.first_name} ${apt.patient?.last_name}\n` +
+            `  ${apt.treatment?.name || 'Sin tratamiento'}\n` +
+            `  Dr(a). ${apt.dental_professional?.first_name || ''} ${apt.dental_professional?.last_name || ''}\n` +
+            `  Estado: ${getStatusText(apt.status)}`
+        ).join('\n\n');
+    
+    alert(mensaje);
+}
+
+        function previousMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentCalendarDate = new Date();
+            renderCalendar();
         }
 
         // ========================================
@@ -1473,7 +1705,22 @@
                         document.getElementById('appointmentProfessional').value = appointment.dental_professional_id;
                         document.getElementById('appointmentTreatment').value = appointment.treatment_id;
                         document.getElementById('appointmentDate').value = appointment.appointment_date;
-                        document.getElementById('appointmentTime').value = appointment.start_time;
+                        
+                        // Extraer solo la hora del campo start_time (puede venir como HH:MM:SS o como datetime)
+                        let timeValue = appointment.start_time;
+                        if (timeValue) {
+                            // Si viene como datetime completo (YYYY-MM-DD HH:MM:SS), extraer solo HH:MM
+                            if (timeValue.includes(' ')) {
+                                timeValue = timeValue.split(' ')[1];
+                            }
+                            // Si viene con segundos (HH:MM:SS), quitar los segundos
+                            if (timeValue.includes(':')) {
+                                const parts = timeValue.split(':');
+                                timeValue = parts[0] + ':' + parts[1];
+                            }
+                        }
+                        document.getElementById('appointmentTime').value = timeValue;
+                        
                         document.getElementById('appointmentStatus').value = appointment.status;
                         document.getElementById('appointmentNotes').value = appointment.notes || '';
                     }
@@ -1497,15 +1744,29 @@
             e.preventDefault();
             
             const id = document.getElementById('appointmentId').value;
+            
+            // Obtener valores del formulario
+            const timeValue = document.getElementById('appointmentTime').value;
+            const selectedStatus = document.getElementById('appointmentStatus').value;
+            
+            // Formatear la hora a HH:MM (eliminar segundos si existen)
+            let formattedTime = timeValue;
+            if (timeValue && timeValue.includes(':')) {
+                const parts = timeValue.split(':');
+                formattedTime = parts[0].padStart(2, '0') + ':' + parts[1].padStart(2, '0');
+            }
+            
             const data = {
                 patient_id: document.getElementById('appointmentPatient').value,
                 dental_professional_id: document.getElementById('appointmentProfessional').value,
                 treatment_id: document.getElementById('appointmentTreatment').value,
                 appointment_date: document.getElementById('appointmentDate').value,
-                start_time: document.getElementById('appointmentTime').value,
-                status: document.getElementById('appointmentStatus').value,
+                start_time: formattedTime,
+                status: selectedStatus,
                 notes: document.getElementById('appointmentNotes').value
             };
+            
+            console.log('📤 Enviando datos de cita:', data);
             
             try {
                 let response;
@@ -1517,13 +1778,23 @@
                     response = await apiRequest('/appointments', 'POST', data);
                 }
                 
+                console.log('📥 Respuesta del servidor:', response);
+                
                 if (response.success) {
                     alert(id ? 'Cita actualizada correctamente' : 'Cita creada correctamente');
                     closeAppointmentModal();
                     loadAppointments();
                     loadDashboardData(); // Actualizar dashboard
                 } else {
-                    alert('Error: ' + (response.message || 'No se pudo guardar la cita'));
+                    // Mostrar errores de validación si existen
+                    let errorMsg = response.message || 'No se pudo guardar la cita';
+                    if (response.errors) {
+                        errorMsg += '\n\n';
+                        for (let field in response.errors) {
+                            errorMsg += response.errors[field].join('\n') + '\n';
+                        }
+                    }
+                    alert('Error: ' + errorMsg);
                 }
             } catch (error) {
                 console.error('Error guardando cita:', error);
@@ -1916,7 +2187,7 @@
                     
                     <div class="space-y-2 mb-4">
                         <p class="text-sm text-gray-600">
-                            <i class="fas fa-clock mr-2"></i>${treatment.duration} minutos
+                            <i class="fas fa-clock mr-2"></i>${treatment.duration_minutes} minutos
                         </p>
                         <p class="text-lg font-bold text-orange-600">
                             <i class="fas fa-dollar-sign mr-2"></i>${Number(treatment.price).toLocaleString('es-CL')}
@@ -1946,7 +2217,8 @@
                 if (treatment) {
                     document.getElementById('treatmentName').value = treatment.name;
                     document.getElementById('treatmentDescription').value = treatment.description;
-                    document.getElementById('treatmentDuration').value = treatment.duration;
+                    // Usar duration_minutes del backend
+                    document.getElementById('treatmentDuration').value = treatment.duration_minutes || treatment.duration;
                     document.getElementById('treatmentPrice').value = treatment.price;
                 }
             } else {

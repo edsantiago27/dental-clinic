@@ -1,21 +1,42 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\MedicalHistory;
-use App\Models\MedicalImage;
+use App\Models\MedicalHistoryFile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class MedicalHistoryController extends Controller
 {
-    // Listar historial de un paciente
-    public function index($patientId)
+    /**
+     * Listar historiales médicos (con filtros)
+     */
+    public function index(Request $request)
     {
-        $histories = MedicalHistory::where('patient_id', $patientId)
-            ->with(['appointment.treatment', 'appointment.dentalProfessional', 'images'])
-            ->orderBy('visit_date', 'desc')
-            ->get();
+        $query = MedicalHistory::with(['patient', 'dentalProfessional', 'appointment', 'files']);
+
+        // Filtrar por paciente
+        if ($request->has('patient_id')) {
+            $query->where('patient_id', $request->patient_id);
+        }
+
+        // Filtrar por profesional
+        if ($request->has('dental_professional_id')) {
+            $query->where('dental_professional_id', $request->dental_professional_id);
+        }
+
+        // Filtrar por rango de fechas
+        if ($request->has('date_from')) {
+            $query->where('consultation_date', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to')) {
+            $query->where('consultation_date', '<=', $request->date_to);
+        }
+
+        $histories = $query->orderBy('consultation_date', 'desc')->paginate(20);
 
         return response()->json([
             'success' => true,
@@ -23,10 +44,12 @@ class MedicalHistoryController extends Controller
         ]);
     }
 
-    // Ver un historial específico
+    /**
+     * Obtener un historial específico
+     */
     public function show($id)
     {
-        $history = MedicalHistory::with(['appointment', 'patient', 'images'])
+        $history = MedicalHistory::with(['patient', 'dentalProfessional', 'appointment', 'files'])
             ->findOrFail($id);
 
         return response()->json([
@@ -35,134 +58,173 @@ class MedicalHistoryController extends Controller
         ]);
     }
 
-    // Crear historial clínico
+    /**
+     * Crear nuevo historial médico
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'patient_id' => 'required|exists:patients,id',
-            'appointment_id' => 'required|exists:appointments,id',
-            'visit_date' => 'required|date',
-            'diagnosis' => 'required|string',
-            'treatment' => 'nullable|string',
-            'medications' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'observations' => 'nullable|string',
-            // Campos adicionales
+            'dental_professional_id' => 'required|exists:dental_professionals,id',
+            'consultation_date' => 'required|date',
+            'reason_for_visit' => 'nullable|string',
+            'symptoms' => 'nullable|string',
+            'diagnosis' => 'nullable|string',
+            'treatment_performed' => 'nullable|string',
+            'prescriptions' => 'nullable|string',
+            'tooth_number' => 'nullable|string',
+            'procedure_notes' => 'nullable|string',
+            'anesthesia_used' => 'nullable|boolean',
             'anesthesia_type' => 'nullable|string',
-            'anesthesia_dose' => 'nullable|string',
-            'xray_taken' => 'boolean',
             'xray_notes' => 'nullable|string',
+            'recommendations' => 'nullable|string',
+            'next_visit_date' => 'nullable|date',
+            'observations' => 'nullable|string',
+            'total_cost' => 'nullable|numeric',
+            'appointment_id' => 'nullable|exists:appointments,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => 'Errores de validación',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $history = MedicalHistory::create($request->all());
+        $history = MedicalHistory::create($validator->validated());
 
         return response()->json([
             'success' => true,
-            'message' => 'Historial clínico creado exitosamente',
-            'data' => $history
+            'message' => 'Historial médico creado exitosamente',
+            'data' => $history->load(['patient', 'dentalProfessional', 'files'])
         ], 201);
     }
 
-    // Actualizar historial
+    /**
+     * Actualizar historial médico
+     */
     public function update(Request $request, $id)
     {
         $history = MedicalHistory::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'visit_date' => 'sometimes|date',
-            'diagnosis' => 'sometimes|string',
-            'treatment' => 'nullable|string',
-            'medications' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'observations' => 'nullable|string',
+            'patient_id' => 'sometimes|exists:patients,id',
+            'dental_professional_id' => 'sometimes|exists:dental_professionals,id',
+            'consultation_date' => 'sometimes|date',
+            'reason_for_visit' => 'nullable|string',
+            'symptoms' => 'nullable|string',
+            'diagnosis' => 'nullable|string',
+            'treatment_performed' => 'nullable|string',
+            'prescriptions' => 'nullable|string',
+            'tooth_number' => 'nullable|string',
+            'procedure_notes' => 'nullable|string',
+            'anesthesia_used' => 'nullable|boolean',
             'anesthesia_type' => 'nullable|string',
-            'anesthesia_dose' => 'nullable|string',
-            'xray_taken' => 'boolean',
             'xray_notes' => 'nullable|string',
+            'recommendations' => 'nullable|string',
+            'next_visit_date' => 'nullable|date',
+            'observations' => 'nullable|string',
+            'total_cost' => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => 'Errores de validación',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $history->update($request->all());
+        $history->update($validator->validated());
 
         return response()->json([
             'success' => true,
-            'message' => 'Historial actualizado exitosamente',
-            'data' => $history
+            'message' => 'Historial médico actualizado exitosamente',
+            'data' => $history->load(['patient', 'dentalProfessional', 'files'])
         ]);
     }
 
-    // Subir imagen/archivo
-    public function uploadImage(Request $request, $historyId)
+    /**
+     * Eliminar historial médico
+     */
+    public function destroy($id)
     {
-        $validator = Validator::make($request->all(), [
-            'image' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB
-            'image_type' => 'required|string|max:50',
-            'description' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $history = MedicalHistory::findOrFail($historyId);
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('medical_images', $filename, 'public');
-
-            $image = MedicalImage::create([
-                'medical_history_id' => $historyId,
-                'image_type' => $request->image_type,
-                'image_url' => $path,
-                'description' => $request->description,
-                'image_date' => now(),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Imagen subida exitosamente',
-                'data' => $image
-            ], 201);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'No se recibió ningún archivo'
-        ], 400);
-    }
-
-    // Eliminar imagen
-    public function deleteImage($imageId)
-    {
-        $image = MedicalImage::findOrFail($imageId);
+        $history = MedicalHistory::findOrFail($id);
         
-        // Eliminar archivo físico
-        if (Storage::disk('public')->exists($image->image_url)) {
-            Storage::disk('public')->delete($image->image_url);
+        // Eliminar archivos físicos
+        foreach ($history->files as $file) {
+            Storage::disk('public')->delete($file->file_path);
         }
-
-        $image->delete();
+        
+        $history->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Imagen eliminada exitosamente'
+            'message' => 'Historial médico eliminado exitosamente'
+        ]);
+    }
+
+    /**
+     * Subir archivo al historial médico
+     */
+    public function uploadFile(Request $request, $id)
+    {
+        $history = MedicalHistory::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|max:10240', // 10MB máximo
+            'file_type' => 'required|in:image,document,xray',
+            'description' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Errores de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $file = $request->file('file');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->storeAs('medical_histories/' . $history->id, $fileName, 'public');
+
+        $medicalFile = MedicalHistoryFile::create([
+            'medical_history_id' => $history->id,
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $filePath,
+            'file_type' => $request->file_type,
+            'mime_type' => $file->getMimeType(),
+            'file_size' => $file->getSize(),
+            'description' => $request->description
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Archivo subido exitosamente',
+            'data' => $medicalFile
+        ], 201);
+    }
+
+    /**
+     * Eliminar archivo del historial
+     */
+    public function deleteFile($historyId, $fileId)
+    {
+        $file = MedicalHistoryFile::where('medical_history_id', $historyId)
+            ->where('id', $fileId)
+            ->firstOrFail();
+
+        // Eliminar archivo físico
+        Storage::disk('public')->delete($file->file_path);
+
+        // Eliminar registro
+        $file->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Archivo eliminado exitosamente'
         ]);
     }
 }

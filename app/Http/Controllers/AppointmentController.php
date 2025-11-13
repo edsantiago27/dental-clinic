@@ -6,7 +6,9 @@ use App\Models\Appointment;
 use App\Services\AppointmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Log;
+use App\Mail\AppointmentConfirmation;
+use Illuminate\Support\Facades\Mail;
 class AppointmentController extends Controller
 {
     protected $appointmentService;
@@ -66,6 +68,17 @@ class AppointmentController extends Controller
 
         try {
             $appointment = $this->appointmentService->createAppointment($request->all());
+
+// Enviar email de confirmación
+        try {
+            if ($appointment->patient->email) {
+                Mail::to($appointment->patient->email)
+                    ->send(new AppointmentConfirmation($appointment));
+            }
+        } catch (\Exception $mailError) {
+            Log::warning('No se pudo enviar email: ' . $mailError->getMessage());
+        }
+
 
             return response()->json([
                 'success' => true,
@@ -162,14 +175,14 @@ class AppointmentController extends Controller
             'data' => $slots
         ]);
     }
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
 {
     $validator = Validator::make($request->all(), [
         'patient_id' => 'sometimes|exists:patients,id',
         'dental_professional_id' => 'sometimes|exists:dental_professionals,id',
         'treatment_id' => 'sometimes|exists:treatments,id',
         'appointment_date' => 'sometimes|date',
-        'start_time' => 'sometimes|date_format:H:i',
+        'start_time' => 'sometimes', // ← Quitamos la validación estricta del formato
         'status' => 'sometimes|in:Pending,Confirmed,Completed,Cancelled',
         'notes' => 'nullable|string'
     ]);
@@ -183,7 +196,23 @@ class AppointmentController extends Controller
 
     try {
         $appointment = Appointment::findOrFail($id);
-        $appointment->update($request->all());
+        
+        // Formatear start_time si viene en el request
+        $data = $request->all();
+        if (isset($data['start_time'])) {
+            // Extraer solo HH:MM del formato que venga
+            $time = $data['start_time'];
+            if (strpos($time, ' ') !== false) {
+                $time = explode(' ', $time)[1];
+            }
+            if (strpos($time, ':') !== false) {
+                $parts = explode(':', $time);
+                $time = $parts[0] . ':' . $parts[1];
+            }
+            $data['start_time'] = $time;
+        }
+        
+        $appointment->update($data);
         $appointment->load(['patient', 'dentalProfessional', 'treatment']);
 
         return response()->json([
@@ -192,28 +221,36 @@ class AppointmentController extends Controller
             'data' => $appointment
         ]);
     } catch (\Exception $e) {
+        Log::error('Error actualizando cita: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => $e->getMessage()
+            'message' => 'Error al actualizar: ' . $e->getMessage()
         ], 400);
     }
 }
-
 public function destroy($id)
 {
     try {
         $appointment = Appointment::findOrFail($id);
+        
+        // Registrar en logs antes de eliminar
+        Log::info('Eliminando cita ID: ' . $id);
+        
         $appointment->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Cita eliminada exitosamente'
-        ]);
+        ], 200);
+        
     } catch (\Exception $e) {
+        Log::error('Error eliminando cita: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+        
         return response()->json([
             'success' => false,
-            'message' => $e->getMessage()
-        ], 400);
+            'message' => 'Error al eliminar cita: ' . $e->getMessage()
+        ], 500);
     }
 }
 }
